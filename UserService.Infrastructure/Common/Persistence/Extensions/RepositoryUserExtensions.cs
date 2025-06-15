@@ -1,5 +1,5 @@
 ﻿using UserService.Infrastructure.Common.Persistence.Extensions.Utility;
-using UserService.Domain.Common.RequestFeatures.ModelParameters;
+using UserService.Application.Common.RequestFeatures.ModelParameters;
 using System.Linq.Dynamic.Core;
 using UserService.Domain.Users;
 

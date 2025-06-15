@@ -1,5 +1,5 @@
 ﻿using UserService.Application.Common.DTOs;
-using UserService.Domain.Common.RequestFeatures;
+using UserService.Application.Common.RequestFeatures;
 using MediatR;
 using UserService.Application.Common.Responses;
 using AutoMapper;

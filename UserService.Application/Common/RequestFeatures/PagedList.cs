@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace UserService.Domain.Common.RequestFeatures;
+namespace UserService.Application.Common.RequestFeatures;
 
 public class PagedList<T> : List<T>
 {

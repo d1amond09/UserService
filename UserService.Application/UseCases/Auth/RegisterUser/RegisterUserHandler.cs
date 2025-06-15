@@ -4,17 +4,21 @@ using UserService.Domain.Users;
 using AutoMapper;
 using MediatR;
 using UserService.Domain.Common.Constants;
+using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Application.UseCases.Auth.RegisterUser;
 
-public class RegisterUserHandler(UserManager<User> userManager, IMapper mapper) : IRequestHandler<RegisterUserCommand, ApiBaseResponse>
+public class RegisterUserHandler(IRepositoryManager repManager, UserManager<User> userManager, IMapper mapper) : IRequestHandler<RegisterUserCommand, ApiBaseResponse>
 {
+	private readonly IRepositoryManager _repManager = repManager;
 	private readonly UserManager<User> _userManager = userManager;
 	private readonly IMapper _mapper = mapper;
 
 	public async Task<ApiBaseResponse> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
 	{
 		var user = _mapper.Map<User>(request.UserForRegistrationDto);
+
+		user.Picture = await _repManager.Pictures.GetDefautPictureAsync();
 
 		string? password = request.UserForRegistrationDto.Password;
 

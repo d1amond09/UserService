@@ -1,4 +1,4 @@
-﻿namespace UserService.Domain.Common.RequestFeatures.ModelParameters;
+﻿namespace UserService.Application.Common.RequestFeatures.ModelParameters;
 
 public class UserParameters : RequestParameters
 {

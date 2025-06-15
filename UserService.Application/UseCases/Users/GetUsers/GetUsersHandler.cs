@@ -1,12 +1,12 @@
 ﻿using UserService.Application.Common.DTOs;
-using UserService.Domain.Common.RequestFeatures.ModelParameters;
-using UserService.Domain.Common.RequestFeatures;
+using UserService.Application.Common.RequestFeatures;
 using MediatR;
 using UserService.Application.Common.Responses;
 using AutoMapper;
 using UserService.Application.Common.Interfaces;
 using UserService.Domain.Users;
 using Microsoft.AspNetCore.Identity;
+using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Application.UseCases.Users.GetUsers;
 

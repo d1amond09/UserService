@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using UserService.Domain.Users;
 
-namespace UserService.Infrastructure.Users.Persistence;
+namespace UserService.Infrastructure.Users.Persistence.Configurations;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {

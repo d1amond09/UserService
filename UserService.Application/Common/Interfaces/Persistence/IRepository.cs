@@ -1,4 +1,4 @@
-﻿namespace UserService.Application.Common.Interfaces;
+﻿namespace UserService.Application.Common.Interfaces.Persistence;
 
 public interface IRepository<T> where T : class
 {

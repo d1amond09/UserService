@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Infrastructure.Services;
+using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Infrastructure;
 

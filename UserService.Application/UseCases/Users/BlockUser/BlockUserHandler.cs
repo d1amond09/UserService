@@ -3,6 +3,7 @@ using UserService.Application.Common.Responses;
 using UserService.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Application.UseCases.Users.BlockUser;
 

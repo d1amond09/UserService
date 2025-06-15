@@ -1,4 +1,4 @@
-﻿using UserService.Domain.Common.RequestFeatures.ModelParameters;
+﻿using UserService.Application.Common.RequestFeatures.ModelParameters;
 using UserService.Application.UseCases.Users.SetUserRole;
 using UserService.Application.UseCases.Users.UnblockUser;
 using UserService.Application.UseCases.Users.DeleteUser;
@@ -6,13 +6,13 @@ using UserService.Application.UseCases.Users.GetUserMe;
 using UserService.Application.UseCases.Users.BlockUser;
 using UserService.Application.UseCases.Users.GetUsers;
 using UserService.Application.Common.DTOs;
-using UserService.Domain.Common.RequestFeatures;
 using UserService.Domain.Common.Constants;
 using Microsoft.AspNetCore.Authorization;
 using UserService.API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using MediatR;
+using UserService.Application.Common.RequestFeatures;
 
 namespace UserService.API.Controllers;
 

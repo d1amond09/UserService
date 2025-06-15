@@ -1,7 +1,7 @@
-﻿using UserService.Application.Common.Interfaces;
-using UserService.Infrastructure.Common.Persistence;
+﻿using UserService.Infrastructure.Common.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Infrastructure.Common.Persistence;
 

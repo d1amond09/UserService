@@ -19,7 +19,7 @@ public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService
 
         httpContext.Response.StatusCode = contextFeature?.Error switch
         {
-            NotFoundException => StatusCodes.Status404NotFound,
+            NotFoundException => StatusCodes.Status404NotFound, 
             BadRequestException => StatusCodes.Status400BadRequest,
             ValidationAppException => StatusCodes.Status422UnprocessableEntity,
             _ => StatusCodes.Status500InternalServerError
