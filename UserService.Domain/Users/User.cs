@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using UserService.Domain.Common.Constants;
 
 namespace UserService.Domain.Users;
 
@@ -6,8 +7,7 @@ public class User : IdentityUser<Guid>
 {
 	public string FirstName { get; set; } = string.Empty;
 	public string LastName { get; set; } = string.Empty;
-	
-	public Picture Picture { get; set; }
+	public Guid? PictureId { get; set; }
 
 	public string? DisplayName => string
 		.IsNullOrWhiteSpace($"{FirstName} {LastName}") 
@@ -21,7 +21,7 @@ public class User : IdentityUser<Guid>
 
 	public User(string userName, string email) : base(userName)
 	{
-		Picture = new Picture();
+		PictureId = Guid.Parse(Pictures.DefaultId);
 		Email = email;
 		NormalizedUserName = userName?.ToUpperInvariant();
 		NormalizedEmail = email?.ToUpperInvariant();

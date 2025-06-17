@@ -6,16 +6,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace UserService.Application.UseCases.Users.DeleteUser;
 
-public class DeleteUserHandler : IRequestHandler<DeleteUserCommand, ApiBaseResponse>
+public class DeleteUserHandler(ICurrentUserService currentUserService, UserManager<User> userManager) : IRequestHandler<DeleteUserCommand, ApiBaseResponse>
 {
-	private readonly ICurrentUserService _currentUserService;
-	private readonly UserManager<User> _userManager;
-
-	public DeleteUserHandler(ICurrentUserService currentUserService, UserManager<User> userManager)
-	{
-		_currentUserService = currentUserService;
-		_userManager = userManager;
-	}
+	private readonly ICurrentUserService _currentUserService = currentUserService;
+	private readonly UserManager<User> _userManager = userManager;
 
 	public async Task<ApiBaseResponse> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
 	{

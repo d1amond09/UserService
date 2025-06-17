@@ -4,8 +4,6 @@ using UserService.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
 builder.Services
     .AddInfrastructure(builder.Configuration)
     .AddPresentation(builder.Configuration)

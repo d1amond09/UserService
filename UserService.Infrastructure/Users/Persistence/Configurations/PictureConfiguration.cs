@@ -8,6 +8,10 @@ public class PictureConfiguration : IEntityTypeConfiguration<Picture>
 {
 	public void Configure(EntityTypeBuilder<Picture> builder)
 	{
+		builder.HasKey(u => u.Id);
+		builder.HasIndex(u => u.Id).IsUnique();
+		builder.HasIndex(u => u.PublicId).IsUnique();
+
 		builder.HasData(
 			new Picture
 			{

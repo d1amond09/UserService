@@ -5,6 +5,7 @@ using AutoMapper;
 using MediatR;
 using UserService.Domain.Common.Constants;
 using UserService.Application.Common.Interfaces.Persistence;
+using System.Diagnostics;
 
 namespace UserService.Application.UseCases.Auth.RegisterUser;
 
@@ -17,8 +18,6 @@ public class RegisterUserHandler(IRepositoryManager repManager, UserManager<User
 	public async Task<ApiBaseResponse> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
 	{
 		var user = _mapper.Map<User>(request.UserForRegistrationDto);
-
-		user.Picture = await _repManager.Pictures.GetDefautPictureAsync();
 
 		string? password = request.UserForRegistrationDto.Password;
 
