@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Common.DTOs;
 using UserService.Application.Common.Interfaces;
 using UserService.Domain.Users;
+using UserService.Infrastructure.Common.Configuration;
 using UserService.Infrastructure.Security;
 
 namespace UserService.Infrastructure.Services;

@@ -16,11 +16,4 @@ public class RefreshTokenCommandValidator : AbstractValidator<RefreshTokenComman
 		RuleFor(x => x.ExpiredTokenDto.RefreshToken)
 			.NotEmpty().WithMessage("Refresh token is required.");
 	}
-
-	public override ValidationResult Validate(ValidationContext<RefreshTokenCommand> context)
-	{
-		return context.InstanceToValidate.ExpiredTokenDto is null
-			? new ValidationResult([new ValidationFailure("ExpiredTokenDto", "ExpiredTokenDto object is null")])
-			: base.Validate(context);
-	}
 }

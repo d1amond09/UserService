@@ -66,7 +66,7 @@ public class UsersController(ISender sender) : ControllerBase
 	}
 
 	[HttpDelete("{id:guid}")]
-	[Authorize(Roles = Roles.Admin)]
+	//[Authorize(Roles = Roles.User)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	public async Task<IActionResult> DeleteUser(Guid id)
 	{

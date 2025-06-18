@@ -19,6 +19,8 @@ using UserService.Application.Common.Interfaces.Persistence;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using UserService.Infrastructure.Security;
+using UserService.Infrastructure.Common.Configuration;
+using UserService.Infrastructure.Security.CustomTokenProviders;
 
 namespace UserService.Infrastructure;
 
@@ -26,23 +28,33 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddInfrastructure(
 		this IServiceCollection services, 
-		IConfiguration configuration)
+		IConfiguration config)
 	{
 		services
 			.AddHttpContextAccessor()
-			.AddServices(configuration)
+			.AddConfigurations(config)
+			.AddServices()
 			.AddAuthorization()
 			.AddConfigIdentity()
-			.AddAuthentication(configuration)
-			.AddPersistence(configuration);
+			.AddAuthentication(config)
+			.AddPersistence(config);
 
 		return services;
 	}
 
-	private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
+	private static IServiceCollection AddConfigurations(this IServiceCollection services, IConfiguration config)
+	{
+		services.Configure<WebAppSettings>(config.GetSection(WebAppSettings.SectionName));
+		services.Configure<JwtSettings>(config.GetSection(JwtSettings.SectionName));
+		services.Configure<EmailSettings>(config.GetSection(EmailSettings.SectionName));
+		return services;
+	}
+
+	private static IServiceCollection AddServices(this IServiceCollection services)
 	{
 		services.AddScoped<IDataShapeService<UserDtos>, DataShapeService<UserDtos>>();
 		services.AddScoped<ICloudinaryService, CloudinaryService>();
+		services.AddScoped<IEmailService, SmtpEmailService>();
 
 		return services;
 	}
@@ -103,9 +115,18 @@ public static class DependencyInjection
 			o.Password.RequireNonAlphanumeric = true;
 			o.Password.RequiredLength = 8;
 			o.User.RequireUniqueEmail = true;
+			o.SignIn.RequireConfirmedEmail = true;
+			o.Tokens.EmailConfirmationTokenProvider = "emailconfirmation";
 		})
 		.AddEntityFrameworkStores<AppDbContext>()
-		.AddDefaultTokenProviders();
+		.AddDefaultTokenProviders()
+		.AddTokenProvider<EmailConfirmationTokenProvider<User>>("emailconfirmation");
+
+		services.Configure<DataProtectionTokenProviderOptions>(opt =>
+			opt.TokenLifespan = TimeSpan.FromHours(2));
+
+		services.Configure<EmailConfirmationTokenProviderOptions>(opt =>
+			opt.TokenLifespan = TimeSpan.FromDays(3));
 
 		return services;
 	}

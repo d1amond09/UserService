@@ -1,4 +1,4 @@
-﻿namespace UserService.Infrastructure.Security;
+﻿namespace UserService.Infrastructure.Common.Configuration;
 
 public class JwtSettings
 {

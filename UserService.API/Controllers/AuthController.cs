@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Domain.Users;
 using MediatR;
+using UserService.Application.UseCases.Auth.ConfirmEmail;
+using Microsoft.AspNetCore.Identity.Data;
+using UserService.Application.UseCases.Auth.ResendConfirmationEmail;
 
 namespace UserService.API.Controllers;
 
@@ -29,6 +32,26 @@ public class AuthController(ISender sender) : ControllerBase
 	{
 		TokenDto tokenDto = await _sender.Send(new LoginUserCommand(userForLogin));
 		return Ok(tokenDto);
+	}
+
+	[HttpGet("confirm-email")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> ConfirmEmail([FromQuery] Guid userId, [FromQuery] string token)
+	{
+		await _sender.Send(new ConfirmEmailCommand(userId, token));
+
+		return Ok("Your email has been successfully confirmed. You can now log in.");
+	}
+
+	[HttpPost("resend-confirmation-email")]
+	[ProducesResponseType(StatusCodes.Status202Accepted)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailRequest request)
+	{
+		await _sender.Send(new ResendConfirmationEmailCommand(request.Email));
+
+		return Accepted();
 	}
 }
 

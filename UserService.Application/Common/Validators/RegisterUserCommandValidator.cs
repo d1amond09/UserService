@@ -39,13 +39,6 @@ public class RegisterUserCommandValidator : AbstractValidator<RegisterUserComman
 		   .WithMessage("The password and confirmation password do not match.");
 	}
 
-	public override ValidationResult Validate(ValidationContext<RegisterUserCommand> context)
-	{
-		return context.InstanceToValidate.UserForRegistrationDto is null
-			? new ValidationResult([new ValidationFailure("UserForRegistrationDto", "UserForRegistrationDto object is null")]) 
-			: base.Validate(context);
-	}
-
 	private async Task<bool> BeUniqueUserName(string username, CancellationToken cancellationToken) =>
 		await _userManager.FindByNameAsync(username) == null;
 

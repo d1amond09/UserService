@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Threading;
+using FluentValidation;
 using MediatR;
 using ValidationException = UserService.Application.Common.Exceptions.ValidationException;
 
@@ -18,23 +19,23 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
 			return await next(ct);
 
 		var context = new ValidationContext<TRequest>(request);
-		
-		var errorsDictionary = _validators
-			.Select(x => x.Validate(context))
-			.SelectMany(x => x.Errors)
-			.Where(x => x != null)
-			.GroupBy(
-				x => x.PropertyName[(x.PropertyName.IndexOf('.') + 1)..],
-				x => x.ErrorMessage,
-				(propertyName, errorMessages) => new
-				{
-					Key = propertyName,
-					Values = errorMessages.Distinct().ToArray()
-				})
-			.ToDictionary(x => x.Key, x => x.Values);
-		
-		if (errorsDictionary.Count > 0)
+
+		var validationResults = await Task.WhenAll(
+		   _validators.Select(v => v.ValidateAsync(context, ct)));
+
+		var failures = validationResults
+			.SelectMany(r => r.Errors)
+			.Where(f => f != null)
+			.ToList();
+
+		if (failures.Count != 0)
+		{
+			var errorsDictionary = failures
+				.GroupBy(e => e.PropertyName, e => e.ErrorMessage)
+				.ToDictionary(failureGroup => failureGroup.Key, failureGroup => failureGroup.ToArray());
+
 			throw new ValidationException(errorsDictionary);
+		}
 		
 		return await next(ct);
 	}

@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using UserService.Infrastructure.Common.Configuration;
 
 namespace UserService.Infrastructure.Security;
 
@@ -13,7 +14,6 @@ public class TokenValidationParametersFactory
 			ValidateAudience = true,
 			ValidateIssuerSigningKey = true,
 			ValidateLifetime = validateLifetime,
-
 			ValidIssuer = settings.ValidIssuer,
 			ValidAudience = settings.ValidAudience,
 			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Secret)),

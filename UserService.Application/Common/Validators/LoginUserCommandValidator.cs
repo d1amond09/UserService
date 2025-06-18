@@ -17,11 +17,4 @@ public class LoginUserCommandValidator : AbstractValidator<LoginUserCommand>
 		RuleFor(x => x.UserToLogin.Password)
 			.NotEmpty().WithMessage("Password is required.");
 	}
-
-	public override ValidationResult Validate(ValidationContext<LoginUserCommand> context)
-	{
-		return context.InstanceToValidate.UserToLogin is null
-			? new ValidationResult([new ValidationFailure("UserToLogin", "UserToLogin object is null")])
-			: base.Validate(context);
-	}
 }
