@@ -4,8 +4,10 @@ using System.Security.Authentication;
 
 namespace UserService.API.ExceptionHandlers;
 
-public class AuthenticationExceptionHandler : IExceptionHandler
+public class AuthenticationExceptionHandler(ILogger<AuthenticationExceptionHandler> logger) : IExceptionHandler
 {
+	private readonly ILogger<AuthenticationExceptionHandler> _logger = logger;
+
 	public async ValueTask<bool> TryHandleAsync(
 		HttpContext httpContext,
 		Exception exception,
@@ -16,6 +18,12 @@ public class AuthenticationExceptionHandler : IExceptionHandler
 		{
 			return false; 
 		}
+
+		logger.LogInformation(
+			"Authentication failed for {Method} {Path}: {Message}",
+			httpContext.Request.Method,
+			httpContext.Request.Path,
+			authException.Message);
 
 		httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
 

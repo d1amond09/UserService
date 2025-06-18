@@ -1,27 +1,51 @@
+using Serilog;
 using UserService.API;
 using UserService.Application;
 using UserService.Infrastructure;
 
-var builder = WebApplication.CreateBuilder(args);
 
-builder.Services
-    .AddInfrastructure(builder.Configuration)
-    .AddApplication()
-    .AddPresentation(builder.Configuration, builder.Environment)
-	;
-
-var app = builder.Build();
-
-app.UseExceptionHandler();
-
-if (app.Environment.IsDevelopment())
+Log.Logger = new LoggerConfiguration()
+	.ReadFrom.Configuration(new ConfigurationBuilder()
+		.SetBasePath(Directory.GetCurrentDirectory())
+		.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+		.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+		.Build())
+	.CreateLogger();
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+
+	var builder = WebApplication.CreateBuilder(args);
+	
+	builder.Host.UseSerilog();
+
+	builder.Services
+		.AddInfrastructure(builder.Configuration)
+		.AddApplication()
+		.AddPresentation(builder.Configuration, builder.Environment);
+
+	var app = builder.Build();
+
+	app.UseSerilogRequestLogging();
+
+	if (app.Environment.IsDevelopment())
+	{
+		app.UseSwagger();
+		app.UseSwaggerUI();
+	}
+
+	app.UseExceptionHandler();
+	app.UseHttpsRedirection();
+	app.UseAuthentication();
+	app.UseAuthorization();
+	app.MapControllers();
+
+	app.Run();
 }
-
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+	Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+	Log.CloseAndFlush();
+}

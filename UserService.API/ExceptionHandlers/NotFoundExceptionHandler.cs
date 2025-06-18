@@ -4,8 +4,9 @@ using UserService.Application.Common.Exceptions;
 
 namespace UserService.API.ExceptionHandlers;
 
-public class NotFoundExceptionHandler : IExceptionHandler
+public class NotFoundExceptionHandler(ILogger<NotFoundExceptionHandler> logger) : IExceptionHandler
 {
+	private readonly ILogger<NotFoundExceptionHandler> _logger = logger;
 	public async ValueTask<bool> TryHandleAsync(
 		HttpContext httpContext,
 		Exception exception,
@@ -15,6 +16,12 @@ public class NotFoundExceptionHandler : IExceptionHandler
 		{
 			return false;
 		}
+
+		_logger.LogWarning(
+			"Object was not found for {Method} {Path}. Errors: {@Errors}",
+			httpContext.Request.Method,
+			httpContext.Request.Path,
+			notFoundException.Message);
 
 		httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
 

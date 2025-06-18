@@ -4,8 +4,9 @@ using UserService.Application.Common.Exceptions;
 
 namespace UserService.API.ExceptionHandlers;
 
-public class ForbiddenAccessExceptionHandler : IExceptionHandler
+public class ForbiddenAccessExceptionHandler(ILogger<ForbiddenAccessExceptionHandler> logger) : IExceptionHandler
 {
+	private readonly ILogger<ForbiddenAccessExceptionHandler> _logger = logger;
 	public async ValueTask<bool> TryHandleAsync(
 		HttpContext httpContext,
 		Exception exception,
@@ -15,6 +16,12 @@ public class ForbiddenAccessExceptionHandler : IExceptionHandler
 		{
 			return false;
 		}
+
+		_logger.LogWarning(
+				"Access was forbidden for {Method} {Path}. Errors: {@Errors}",
+				httpContext.Request.Method,
+				httpContext.Request.Path,
+				accessException.Message);
 
 		httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
 
