@@ -4,39 +4,23 @@ using UserService.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using UserService.Application.Common.Interfaces.Persistence;
+using UserService.Application.Common.Exceptions;
 
 namespace UserService.Application.UseCases.Users.BlockUser;
 
-public class BlockUserHandler(IRepositoryManager repManager, ICurrentUserService currentUserService, UserManager<User> userManager) : IRequestHandler<BlockUserCommand, ApiBaseResponse>
+public class BlockUserHandler(IUserRepository userRep, UserManager<User> userManager) 
+	: IRequestHandler<BlockUserCommand>
 {
-	private readonly IRepositoryManager _repManager = repManager;
-	private readonly ICurrentUserService _currentUserService = currentUserService;
+	private readonly IUserRepository _userRep = userRep;
 	private readonly UserManager<User> _userManager = userManager;
 
-	public async Task<ApiBaseResponse> Handle(BlockUserCommand request, CancellationToken cancellationToken)
+	public async Task Handle(BlockUserCommand request, CancellationToken ct)
 	{
-		if (!await _currentUserService.IsAdminAsync())
-		{
-			return new ApiForbiddenResponse("Only administrators can block users.");
-		}
-
-		var userToBlock = await _userManager.FindByIdAsync(request.UserId.ToString());
-		
-		if (userToBlock == null)
-		{
-			return new ApiNotFoundResponse($"User with ID '{request.UserId}' not found.");
-		}
-
-		if (userToBlock.Id == _currentUserService.UserId)
-		{
-			return new ApiBadRequestResponse("Administrators cannot block themselves.");
-		}
+		User userToBlock = await _userRep.GetByIdAsync(request.UserId, ct)
+			?? throw new NotFoundException($"User with ID '{request.UserId}' not found.");
 
 		userToBlock.Block();
 
-		_repManager.Users.Update(userToBlock); 
-		await _repManager.CommitAsync(cancellationToken);
-
-		return new ApiOkResponse<string>("User blocked successfully."); 
+		await _userManager.UpdateAsync(userToBlock); 
 	}
 }

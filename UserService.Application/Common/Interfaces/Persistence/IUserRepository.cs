@@ -6,7 +6,7 @@ namespace UserService.Application.Common.Interfaces.Persistence;
 
 public interface IUserRepository
 {
-	IQueryable<User> GetUsersAsQueryable();
-	Task<PagedList<User>> GetUsersAsync(UserParameters userParameters, CancellationToken cancellationToken = default);
-	void Update(User user);
+	Task<User?> GetByIdAsync(Guid userId, CancellationToken ct);
+	Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<Guid> userIds, CancellationToken ct);
+	Task<PagedList<User>> GetAllAsync(UserParameters userParams, CancellationToken ct = default);
 }

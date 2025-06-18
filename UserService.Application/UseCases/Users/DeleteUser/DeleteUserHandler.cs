@@ -3,41 +3,34 @@ using UserService.Application.Common.Responses;
 using UserService.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using UserService.Application.Common.Exceptions;
+using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Application.UseCases.Users.DeleteUser;
 
-public class DeleteUserHandler(ICurrentUserService currentUserService, UserManager<User> userManager) : IRequestHandler<DeleteUserCommand, ApiBaseResponse>
+public class DeleteUserHandler(ICurrentUserService currentUserService, IUserRepository userRep, UserManager<User> userManager)
+	: IRequestHandler<DeleteUserCommand>
 {
 	private readonly ICurrentUserService _currentUserService = currentUserService;
+	private readonly IUserRepository _userRep = userRep;
 	private readonly UserManager<User> _userManager = userManager;
 
-	public async Task<ApiBaseResponse> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
+	public async Task Handle(DeleteUserCommand request, CancellationToken ct)
 	{
-		if (!await _currentUserService.IsAdminAsync())
-		{
-			return new ApiForbiddenResponse("Only administrators can delete users.");
-		}
+		Guid userId = request.UserId;
 
-		var userToDelete = await _userManager.FindByIdAsync(request.UserId.ToString());
-		if (userToDelete == null)
-		{
-			return new ApiNotFoundResponse($"User with ID '{request.UserId}' not found.");
-		}
+		User userToDelete = await _userRep.GetByIdAsync(userId, ct) 
+			?? throw new NotFoundException($"User with ID '{userId}' not found.");
 
 		if (userToDelete.Id == _currentUserService.UserId)
-		{
-			return new ApiBadRequestResponse("Administrators cannot delete themselves.");
-		}
+			throw new ForbiddenAccessException("Administrators cannot delete themselves.");
 
 		var result = await _userManager.DeleteAsync(userToDelete);
 
 		if (!result.Succeeded)
 		{
-			var errors = result.Errors.Select(e => e.Description).ToList();
-			string messageErrors = string.Join(',', [.. errors]);
-			return new ApiBadRequestResponse($"{messageErrors}. Failed to delete user.");
+			var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+			throw new BadRequestException($"Failed to delete user. Errors: {errors}");
 		}
-
-		return new ApiOkResponse<string>("User deleted successfully.");
 	}
 }

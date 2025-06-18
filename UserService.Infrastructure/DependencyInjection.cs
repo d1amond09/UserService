@@ -5,9 +5,6 @@ using UserService.Application.Common.DTOs;
 using UserService.Application.Common.Interfaces;
 using UserService.Domain.Users;
 using UserService.Infrastructure.Common.Persistence;
-using UserService.Infrastructure.Security.CurrentUserService;
-using UserService.Infrastructure.Security.TokenGenerator;
-using UserService.Infrastructure.Security.TokenValidation;
 using UserService.Infrastructure.Users.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -19,12 +16,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Infrastructure.Services;
 using UserService.Application.Common.Interfaces.Persistence;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using UserService.Infrastructure.Security;
 
 namespace UserService.Infrastructure;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+	public static IServiceCollection AddInfrastructure(
+		this IServiceCollection services, 
+		IConfiguration configuration)
 	{
 		services
 			.AddHttpContextAccessor()
@@ -57,7 +59,8 @@ public static class DependencyInjection
 			})
 		);
 
-		services.AddScoped<IRepositoryManager, RepositoryManager>();
+		services.AddScoped<IUserRepository, UserRepository>();
+		services.AddScoped<IPictureRepository, PictureRepository>();
 
 		return services;
 	}
@@ -65,33 +68,25 @@ public static class DependencyInjection
 	private static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddScoped<ICurrentUserService, CurrentUserService>();
-		services.AddSingleton<ITokenValidator, TokenValidator>();
-		services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+		services.AddScoped<ITokenService, TokenService>();
 
-		var jwtSettings = configuration.GetSection("JwtSettings");
-		var secretKey = configuration.GetValue<string>("SECRET");
-		ArgumentNullException.ThrowIfNull(secretKey);
+		var jwtSettings = new JwtSettings();
+		configuration.Bind(JwtSettings.SectionName, jwtSettings);
+		services.AddSingleton(Options.Create(jwtSettings));
 
 		services
-		.AddAuthentication(opt =>
+		.AddAuthentication(opts =>
 		{
-			opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-			opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+			opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+			opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+			opts.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 		})
-		.AddJwtBearer(options =>
+		.AddJwtBearer(opts =>
 		{
-			options.TokenValidationParameters = new TokenValidationParameters
-			{
-				ValidateIssuer = true,
-				ValidateAudience = true,
-				ValidateLifetime = true,
-				ValidateIssuerSigningKey = true,
-
-				ValidIssuer = jwtSettings["validIssuer"],
-				ValidAudience = jwtSettings["validAudience"],
-
-				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-			};
+			opts.TokenValidationParameters = TokenValidationParametersFactory.Create(
+				jwtSettings,
+				validateLifetime: true
+			);
 		});
 
 		return services;

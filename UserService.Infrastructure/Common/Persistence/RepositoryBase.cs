@@ -1,11 +1,10 @@
 ﻿using UserService.Infrastructure.Common.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Infrastructure.Common.Persistence;
 
-public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
+public abstract class RepositoryBase<T> where T : class
 {
 	protected readonly AppDbContext _db;
 	protected readonly DbSet<T> _dbSet;
@@ -64,5 +63,6 @@ public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
 	public virtual void DeleteRange(IEnumerable<T> entities) => _dbSet.RemoveRange(entities);
 
 	public Task SaveAsync() => _db.SaveChangesAsync();
+	public Task SaveAsync(CancellationToken ct) => _db.SaveChangesAsync(ct);
 }
 

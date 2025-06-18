@@ -10,32 +10,18 @@ using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Application.UseCases.Users.GetUsers;
 
-public class GetUsersHandler(IRepositoryManager repManager, IMapper mapper, ICurrentUserService currentUserService, UserManager<User> userManager) 
-	: IRequestHandler<GetUsersQuery, ApiBaseResponse>
+public class GetUsersHandler(IUserRepository userRep, IMapper mapper) 
+	: IRequestHandler<GetUsersQuery, PagedList<UserDetailsDto>>
 {
-	private readonly IRepositoryManager _repManager = repManager;
+	private readonly IUserRepository _userRep = userRep;
 	private readonly IMapper _mapper = mapper;
-	private readonly UserManager<User> _userManager = userManager;
 
-	public async Task<ApiBaseResponse> Handle(GetUsersQuery request, CancellationToken cancellationToken)
+	public async Task<PagedList<UserDetailsDto>> Handle(GetUsersQuery request, CancellationToken ct)
 	{
-		var pagedUsers = await _repManager.Users.GetUsersAsync(request.Parameters, cancellationToken);
+		var pagedUsers = await _userRep.GetAllAsync(request.Parameters, ct);
 
-		var userDtos = new List<UserDetailsDto>();
-		foreach (var user in pagedUsers)
-		{
-			var userDto = _mapper.Map<UserDetailsDto>(user);
-			userDto.Roles = await _userManager.GetRolesAsync(user); 
-			userDtos.Add(userDto);
-		}
+		var userDtos = _mapper.Map<IEnumerable<UserDetailsDto>>(pagedUsers);
 
-		var pagedResult = new PagedList<UserDetailsDto>(
-			userDtos,
-			pagedUsers.MetaData.TotalCount,
-			pagedUsers.MetaData.CurrentPage,
-			pagedUsers.MetaData.PageSize
-		);
-
-		return new ApiOkResponse<(List<UserDetailsDto> Items, MetaData MetaData)>((userDtos, pagedResult.MetaData));
+		return new PagedList<UserDetailsDto>(userDtos, pagedUsers.MetaData);
 	}
 }

@@ -2,26 +2,32 @@
 using Microsoft.AspNetCore.Identity;
 using UserService.Domain.Users;
 using MediatR;
+using System.Security.Authentication;
+using UserService.Application.Common.Interfaces;
+using UserService.Application.Common.DTOs;
 
 namespace UserService.Application.UseCases.Auth.LoginUser;
 
-public class LoginUserHandler(UserManager<User> userManager) : IRequestHandler<LoginUserCommand, ApiBaseResponse>
+public class LoginUserHandler(UserManager<User> userManager, ITokenService tokenService) : IRequestHandler<LoginUserCommand, TokenDto>
 {
 	private readonly UserManager<User> _userManager = userManager;
+	private readonly ITokenService _tokenService = tokenService;
 
-	public async Task<ApiBaseResponse> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+	public async Task<TokenDto> Handle(LoginUserCommand request, CancellationToken ct)
 	{
 		User? user = await _userManager.FindByNameAsync(request.UserToLogin.UserName ?? "");
 
-		if(user == null)
-		{
-			return new ApiNotFoundResponse("User");
-		}
-
 		bool isValid = await _userManager.CheckPasswordAsync(user, request.UserToLogin.Password ?? "");
+		
+		if(user == null || !isValid)
+			throw new AuthenticationException("Invalid username or password");
 
-		(bool, User) result = new(isValid, user);
+		var tokenDto = await _tokenService.CreateTokensAsync(user);
 
-		return new ApiOkResponse<(bool, User?)>(result);
+		user.RefreshToken = tokenDto.RefreshToken;
+		user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+		await _userManager.UpdateAsync(user);
+
+		return tokenDto;
 	}
 }

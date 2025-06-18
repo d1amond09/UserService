@@ -5,7 +5,7 @@ namespace UserService.Application.Common.RequestFeatures;
 public class PagedList<T> : List<T>
 {
 	public MetaData MetaData { get; set; }
-	public PagedList(List<T> items, int count, int pageNumber, int pageSize)
+	public PagedList(IEnumerable<T> items, int count, int pageNumber, int pageSize)
 	{
 		MetaData = new MetaData
 		{
@@ -15,6 +15,13 @@ public class PagedList<T> : List<T>
 		};
 		AddRange(items);
 	}
+
+	public PagedList(IEnumerable<T> items, MetaData metaData)
+	{
+		MetaData = metaData;
+		AddRange(items);
+	}
+
 	public static PagedList<T> ToPagedList(IEnumerable<T> source, int pageNumber, int pageSize)
 	{
 		var count = source.Count();

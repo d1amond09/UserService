@@ -6,11 +6,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddInfrastructure(builder.Configuration)
-    .AddPresentation(builder.Configuration)
     .AddApplication()
+    .AddPresentation(builder.Configuration, builder.Environment)
 	;
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

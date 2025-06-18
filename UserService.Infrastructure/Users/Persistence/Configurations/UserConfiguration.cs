@@ -8,6 +8,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
 	public void Configure(EntityTypeBuilder<User> builder)
 	{
+		builder.HasMany(e => e.UserRoles)
+			 .WithOne(e => e.User)
+			 .HasForeignKey(ur => ur.UserId)
+			 .IsRequired();
+
 		builder.Property(u => u.FirstName).HasMaxLength(100);
 		builder.Property(u => u.LastName).HasMaxLength(100);
 

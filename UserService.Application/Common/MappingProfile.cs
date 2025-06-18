@@ -13,7 +13,8 @@ public class MappingProfile : Profile
 
 		CreateMap<User, UserSummaryDto>();
 		CreateMap<User, UserDetailsDto>()
-			.ForMember(dest => dest.Roles, opt => opt.Ignore());
+			.ForMember(dest => dest.Roles, opt => opt.Ignore())
+			.ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.Name).ToList()));
 	}
 }
 

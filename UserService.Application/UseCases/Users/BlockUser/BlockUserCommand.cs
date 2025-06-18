@@ -3,4 +3,4 @@ using MediatR;
 
 namespace UserService.Application.UseCases.Users.BlockUser;
 
-public sealed record BlockUserCommand(Guid UserId) : IRequest<ApiBaseResponse>;
+public sealed record BlockUserCommand(Guid UserId) : IRequest;

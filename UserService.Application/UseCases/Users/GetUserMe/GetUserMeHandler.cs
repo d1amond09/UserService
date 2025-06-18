@@ -6,27 +6,27 @@ using AutoMapper;
 using UserService.Application.Common.Interfaces;
 using UserService.Domain.Users;
 using Microsoft.AspNetCore.Identity;
+using UserService.Application.Common.Exceptions;
+using Microsoft.EntityFrameworkCore;
+using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Application.UseCases.Users.GetUserMe;
 
-public class GetUserMeHandler(IMapper mapper, ICurrentUserService currentUserService, UserManager<User> userManager) 
-	: IRequestHandler<GetUserMeQuery, ApiBaseResponse>
+public class GetUserMeHandler(IMapper mapper, ICurrentUserService currentUserService, IUserRepository userRep) 
+	: IRequestHandler<GetUserMeQuery, UserDetailsDto>
 {
 	private readonly IMapper _mapper = mapper;
 	private readonly ICurrentUserService _currentUserService = currentUserService;
-	private readonly UserManager<User> _userManager = userManager; 
+	private readonly IUserRepository _userRep = userRep; 
 
-	public async Task<ApiBaseResponse> Handle(GetUserMeQuery request, CancellationToken cancellationToken)
+	public async Task<UserDetailsDto> Handle(GetUserMeQuery request, CancellationToken ct)
 	{
-		var user = await _currentUserService.GetCurrentUserAsync(cancellationToken);
-		if (user == null)
-		{
-			return new ApiNotFoundResponse("Not found user");
-		}
+		Guid userId = _currentUserService.UserId 
+			?? throw new UnauthorizedAccessException();
 
-		var userDto = _mapper.Map<UserDetailsDto>(user);
-		userDto.Roles = await _userManager.GetRolesAsync(user); 
+		User user = await _userRep.GetByIdAsync(userId, ct)
+			?? throw new NotFoundException("User not found.");
 
-		return new ApiOkResponse<UserDetailsDto>(userDto);
+		return _mapper.Map<UserDetailsDto>(user);
 	}
 }

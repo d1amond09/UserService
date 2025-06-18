@@ -1,6 +1,7 @@
 ﻿using UserService.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace UserService.Infrastructure.Users.Persistence.Configurations;
 
@@ -8,6 +9,11 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
 {
 	public void Configure(EntityTypeBuilder<Role> builder)
 	{
+		builder.HasMany(e => e.UserRoles)
+			.WithOne(e => e.Role) 
+			.HasForeignKey(ur => ur.RoleId) 
+			.IsRequired();
+
 		builder.HasData(
 			new Role
 			{

@@ -1,6 +1,7 @@
-﻿using UserService.Domain.Common.Exceptions;
+﻿using UserService.Application.Common.Exceptions;
 using FluentValidation;
 using MediatR;
+using ValidationException = UserService.Application.Common.Exceptions.ValidationException;
 
 namespace UserService.Application.Common.Behaviors;
 
@@ -32,7 +33,7 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
 			})
 		.ToDictionary(x => x.Key, x => x.Values);
 		if (errorsDictionary.Count > 0)
-			throw new ValidationAppException(errorsDictionary);
+			throw new ValidationException(errorsDictionary);
 		return await next(cancellationToken);
 	}
 }

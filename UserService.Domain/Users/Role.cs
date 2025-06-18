@@ -2,4 +2,7 @@
 
 namespace UserService.Domain.Users;
 
-public class Role : IdentityRole<Guid> { }
+public class Role : IdentityRole<Guid> 
+{
+	public virtual ICollection<UserRole> UserRoles { get; set; } = [];
+}

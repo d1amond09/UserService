@@ -5,4 +5,4 @@ using MediatR;
 namespace UserService.Application.UseCases.Auth.RegisterUser;
 
 public sealed record RegisterUserCommand(UserForRegistrationDto UserForRegistrationDto) :
-	IRequest<ApiBaseResponse>;
+	IRequest<Guid>;

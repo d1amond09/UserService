@@ -9,61 +9,34 @@ using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Infrastructure.Users.Persistence;
 
-public class UserRepository(UserManager<User> userManager, AppDbContext dbContext) : IUserRepository
+public class UserRepository(AppDbContext db) : RepositoryBase<User>(db), IUserRepository
 {
-	private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-	private readonly AppDbContext _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+	public async Task<User?> GetByIdAsync(Guid userId, CancellationToken ct) =>
+		await FindAll()
+			.Include(u => u.UserRoles)
+			.ThenInclude(ur => ur.Role)
+			.FirstOrDefaultAsync(u => u.Id == userId, ct);
 
-	public IQueryable<User> GetUsersAsQueryable()
+	public async Task<PagedList<User>> GetAllAsync(UserParameters userParams, CancellationToken ct)
 	{
-		return _userManager.Users; 
+		IQueryable<User> usersQuery = FindAll()
+			.Include(u => u.UserRoles)
+			.ThenInclude(ur => ur.Role)
+			.FilterUsers(userParams)
+			.Search(userParams.SearchTerm)
+			.Sort(userParams.OrderBy);
+
+		return await PagedList<User>.ToPagedListAsync(
+			usersQuery,
+			userParams.PageNumber,
+			userParams.PageSize, 
+			ct);
 	}
 
-	public async Task<PagedList<User>> GetUsersAsync(UserParameters userParameters, CancellationToken cancellationToken = default)
-	{
-		var usersQuery = _userManager.Users
-			.AsNoTracking() 
-			.FilterUsers(userParameters) 
-			.Search(userParameters.SearchTerm) 
-			.Sort(userParameters.OrderBy); 
-
-		return await PagedList<User>.ToPagedListAsync(usersQuery,
-			userParameters.PageNumber,
-			userParameters.PageSize,
-			cancellationToken);
-	}
-	
-	public async Task<User?> GetByIdWithNavigationsAsync(Guid id, CancellationToken cancellationToken = default)
-	{
-		return await _userManager.Users
-			.AsNoTracking()
-			.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
-	}
-
-	public async Task<List<User>> SearchUsersForAutocompleteAsync(string searchTerm, int maxResults, CancellationToken cancellationToken = default)
-	{
-		var query = _userManager.Users.AsNoTracking();
-
-		if (!string.IsNullOrWhiteSpace(searchTerm))
-		{
-			query = query.Search(searchTerm);
-		}
-
-		return await query
-			.OrderBy(u => u.LastName).ThenBy(u => u.FirstName)
-			.Take(maxResults)
-			.ToListAsync(cancellationToken);
-	}
-
-	public async Task<User?> FindByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
-	{
-		return await _userManager.Users
-			.AsNoTracking()
-			.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken);
-	}
-
-	public void Update(User user)
-	{
-		_dbContext.Users.Update(user);
-	}
+	public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<Guid> userIds, CancellationToken ct) =>
+		await FindAll()
+			.Include(u => u.UserRoles)
+			.ThenInclude(ur => ur.Role)
+			.Where(u => userIds.Contains(u.Id))
+			.ToListAsync(ct);
 }

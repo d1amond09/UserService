@@ -6,35 +6,35 @@ using MediatR;
 using UserService.Domain.Common.Constants;
 using UserService.Application.Common.Interfaces.Persistence;
 using System.Diagnostics;
+using UserService.Application.Common.Exceptions;
 
 namespace UserService.Application.UseCases.Auth.RegisterUser;
 
-public class RegisterUserHandler(IRepositoryManager repManager, UserManager<User> userManager, IMapper mapper) : IRequestHandler<RegisterUserCommand, ApiBaseResponse>
+public class RegisterUserHandler(UserManager<User> userManager, IMapper mapper) 
+	: IRequestHandler<RegisterUserCommand, Guid>
 {
-	private readonly IRepositoryManager _repManager = repManager;
 	private readonly UserManager<User> _userManager = userManager;
 	private readonly IMapper _mapper = mapper;
 
-	public async Task<ApiBaseResponse> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+	public async Task<Guid> Handle(RegisterUserCommand request, CancellationToken ct)
 	{
-		var user = _mapper.Map<User>(request.UserForRegistrationDto);
+		User user = _mapper.Map<User>(request.UserForRegistrationDto);
 
-		string? password = request.UserForRegistrationDto.Password;
+		string password = request.UserForRegistrationDto.Password 
+			?? throw new BadRequestException("Password is null");
+		
+		var result = await _userManager.CreateAsync(user, password);
 
-		if(password == null)
+		if (!result.Succeeded)
 		{
-			return new ApiBadRequestResponse("Password is null");
+			var errors = result.Errors
+				.ToDictionary(e => e.Code, e => new[] { e.Description });
+
+			throw new ValidationException(errors);
 		}
 
-		var identityResult = await _userManager.CreateAsync(user, password);
+		await _userManager.AddToRoleAsync(user, "User");
 
-		if (identityResult.Succeeded)
-		{
-			await _userManager.AddToRolesAsync(user, [Roles.User]);
-		}
-
-		(IdentityResult, User) result = new(identityResult, user);
-
-		return new ApiOkResponse<(IdentityResult, User)>(result);
+		return user.Id;
 	}
 }
