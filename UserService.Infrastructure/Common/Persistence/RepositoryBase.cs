@@ -25,36 +25,20 @@ public abstract class RepositoryBase<T> where T : class
 			? _dbSet.Where(expression)
 			: _dbSet.Where(expression).AsNoTracking();
 
-	public virtual Task<T?> FindAsync(params object[] keyValues) =>
-		_dbSet.FindAsync(keyValues).AsTask();
-
-	public virtual ValueTask<T?> FindAsync(object[] keyValues, CancellationToken cancellationToken = default) =>
-		_dbSet.FindAsync(keyValues, cancellationToken);
-
-	public virtual async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> expression, bool trackChanges = false, CancellationToken cancellationToken = default) =>
+	public virtual async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> expression, bool trackChanges = false, CancellationToken ct = default) =>
 		await FindByCondition(expression, trackChanges)
-					 .FirstOrDefaultAsync(cancellationToken);
+			.FirstOrDefaultAsync(ct);
 
-	public virtual async Task<List<T>> ListAllAsync(bool trackChanges = false, CancellationToken cancellationToken = default) =>
-		await FindAll(trackChanges).ToListAsync(cancellationToken);
-
-	public virtual async Task<List<T>> ListAsync(Expression<Func<T, bool>> expression, bool trackChanges = false, CancellationToken cancellationToken = default) =>
-		await FindByCondition(expression, trackChanges).ToListAsync(cancellationToken);
-
-	public virtual async Task<bool> ExistsAsync(Expression<Func<T, bool>> expression, CancellationToken cancellationToken = default) =>
-		await _dbSet.AnyAsync(expression, cancellationToken);
-
-	public virtual async Task<int> CountAsync(Expression<Func<T, bool>>? expression = null, CancellationToken cancellationToken = default) =>
+	public virtual async Task<int> CountAsync(Expression<Func<T, bool>>? expression = null, CancellationToken ct = default) =>
 		expression == null
-			? await _dbSet.CountAsync(cancellationToken)
-			: await _dbSet.CountAsync(expression, cancellationToken);
-
+			? await _dbSet.CountAsync(ct)
+			: await _dbSet.CountAsync(expression, ct);
 
 	public virtual void Create(T entity) => _db.Set<T>().Add(entity);
-	public virtual async Task CreateAsync(T entity, CancellationToken cancellationToken = default) =>
-		await _dbSet.AddAsync(entity, cancellationToken);
-	public virtual async Task CreateRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default) =>
-		await _dbSet.AddRangeAsync(entities, cancellationToken);
+	public virtual async Task CreateAsync(T entity, CancellationToken ct = default) =>
+		await _dbSet.AddAsync(entity, ct);
+	public virtual async Task CreateRangeAsync(IEnumerable<T> entities, CancellationToken ct = default) =>
+		await _dbSet.AddRangeAsync(entities, ct);
 
 	public void Update(T entity) => _dbSet.Update(entity);
 	public virtual void UpdateRange(IEnumerable<T> entities) => _dbSet.UpdateRange(entities);
