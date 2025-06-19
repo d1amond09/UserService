@@ -29,6 +29,7 @@ public class UsersController(ISender sender) : ControllerBase
 		return Ok(userDetails);
 	}
 
+	[Authorize]
 	[HttpGet("{id:guid}", Name = "GetUserById")]
 	public async Task<IActionResult> GetUserById(Guid id)
 	{
@@ -36,6 +37,7 @@ public class UsersController(ISender sender) : ControllerBase
 		return Ok(userDetails);
 	}
 
+	[Authorize]
 	[HttpGet]
 	public async Task<IActionResult> GetUsers([FromQuery] UserParameters userParameters)
 	{
@@ -46,8 +48,8 @@ public class UsersController(ISender sender) : ControllerBase
 		return Ok(userList);
 	}
 
-	[HttpPut("{id:guid}")] 
 	[Authorize(Roles = "Admin")]
+	[HttpPut("{id:guid}")] 
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -69,8 +71,8 @@ public class UsersController(ISender sender) : ControllerBase
 		return NoContent();
 	}
 
-	[HttpPatch("{id:guid}/status")]
 	[Authorize(Roles = "Admin")]
+	[HttpPatch("{id:guid}/status")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -82,8 +84,8 @@ public class UsersController(ISender sender) : ControllerBase
 		return NoContent();
 	}
 
-	[HttpDelete("{id:guid}")]
 	[Authorize(Roles = Roles.Admin)]
+	[HttpDelete("{id:guid}")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	public async Task<IActionResult> DeleteUser(Guid id)
 	{
