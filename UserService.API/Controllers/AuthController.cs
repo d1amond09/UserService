@@ -8,6 +8,8 @@ using MediatR;
 using UserService.Application.UseCases.Auth.ConfirmEmail;
 using Microsoft.AspNetCore.Identity.Data;
 using UserService.Application.UseCases.Auth.ResendConfirmationEmail;
+using UserService.Application.UseCases.Auth.ForgotPassword;
+using UserService.Application.UseCases.Auth.ResetPassword;
 
 namespace UserService.API.Controllers;
 
@@ -42,7 +44,7 @@ public class AuthController(ISender sender) : ControllerBase
 	{
 		await _sender.Send(new ConfirmEmailCommand(userId, token));
 
-		return Ok("Your email has been successfully confirmed. You can now log in.");
+		return Ok(new { Message = "Your email has been successfully confirmed. You can now log in." });
 	}
 
 	[HttpPost("resend-confirmation-email")]
@@ -53,6 +55,24 @@ public class AuthController(ISender sender) : ControllerBase
 		await _sender.Send(new ResendConfirmationEmailCommand(request.Email));
 
 		return Accepted();
+	}
+
+	[HttpPost("forgot-password")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+	{
+		await _sender.Send(new ForgotPasswordCommand(request.Email));
+
+		return Ok(new { Message = "If an account with this email exists, a password reset link has been sent." });
+	}
+
+	[HttpPost("reset-password")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+	{
+		await _sender.Send(command);
+		return Ok(new { Message = "Your password has been successfully reset." });
 	}
 }
 
