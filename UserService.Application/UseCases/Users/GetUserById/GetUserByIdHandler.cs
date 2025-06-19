@@ -6,20 +6,24 @@ using UserService.Application.Common.Interfaces;
 using UserService.Application.UseCases.Users.GetUserMe;
 using UserService.Application.Common.Exceptions;
 using UserService.Domain.Users;
+using UserService.Domain.Common.Constants;
 
 namespace UserService.Application.UseCases.Users.GetUserById;
 
-public class GetUserByIdHandler(IMapper mapper, IUserRepository userRep)
+public class GetUserByIdHandler(IMapper mapper, IUserRepository userRep, IPictureRepository picRep)
 	: IRequestHandler<GetUserByIdQuery, UserDetailsDto>
 {
-	private readonly IMapper _mapper = mapper;
-	private readonly IUserRepository _userRep = userRep;
-
 	public async Task<UserDetailsDto> Handle(GetUserByIdQuery request, CancellationToken ct)
 	{
-		User user = await _userRep.GetByIdAsync(request.UserId, ct)
+		User user = await userRep.GetByIdAsync(request.UserId, ct)
 			?? throw new NotFoundException("User not found.");
 
-		return _mapper.Map<UserDetailsDto>(user);
+		var userDto = mapper.Map<UserDetailsDto>(user);
+
+		Picture picture = await picRep.GetByIdAsync(user.PictureId ?? Guid.Parse(Pictures.DefaultId))
+			?? throw new NotFoundException("Picture was not found.");
+
+		userDto.PictureUrl = picture.Url;
+		return userDto;
 	}
 }

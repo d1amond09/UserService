@@ -8,9 +8,6 @@ using UserService.Application.Common.Interfaces;
 using UserService.Domain.Common.Constants;
 using UserService.Domain.Users;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using UserService.Infrastructure.Common.Persistence;
 
 namespace UserService.Infrastructure.Services;
 
@@ -25,7 +22,6 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
 		get
 		{
 			var userIdClaim = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-
 			return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
 		}
 	}

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UserService.API.Contracts.Requests;
+namespace UserService.Application.Common.DTOs;
 
-public record ResendConfirmationEmailRequest
+public record ResendConfirmationEmailDto
 {
     [Required]
 	[EmailAddress]

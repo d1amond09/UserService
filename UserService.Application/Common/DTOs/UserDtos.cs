@@ -11,6 +11,8 @@ public record UserDtos
 	public string? Email { get; init; }
 }
 
+public record UpdateUserDto(string FirstName, string LastName, string UserName,	Guid? PictureId);
+
 public record UserForRegistrationDto
 {
 	public string? FirstName { get; init; }
@@ -42,5 +44,6 @@ public record UserForLoginDto
 public record UserSummaryDto(Guid Id, string UserName, string Email);
 public record UserDetailsDto(Guid Id, string UserName, string Email, string? FirstName, string? LastName, bool IsBlocked)
 {
+	public string? PictureUrl { get; set; }
 	public IList<string> Roles { get; set; } = [];
 }

@@ -52,7 +52,6 @@ public static class DependencyInjection
 
 	private static IServiceCollection AddServices(this IServiceCollection services)
 	{
-		services.AddScoped<IDataShapeService<UserDtos>, DataShapeService<UserDtos>>();
 		services.AddScoped<ICloudinaryService, CloudinaryService>();
 		services.AddScoped<IEmailService, SmtpEmailService>();
 
@@ -120,7 +119,8 @@ public static class DependencyInjection
 		})
 		.AddEntityFrameworkStores<AppDbContext>()
 		.AddDefaultTokenProviders()
-		.AddTokenProvider<EmailConfirmationTokenProvider<User>>("emailconfirmation");
+		.AddTokenProvider<EmailConfirmationTokenProvider<User>>("emailconfirmation")
+		.AddSignInManager<CustomSignInManager>();
 
 		services.Configure<DataProtectionTokenProviderOptions>(opt =>
 			opt.TokenLifespan = TimeSpan.FromHours(2));

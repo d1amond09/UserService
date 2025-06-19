@@ -4,10 +4,9 @@ using System.Security.Authentication;
 
 namespace UserService.API.ExceptionHandlers;
 
-public class AuthenticationExceptionHandler(ILogger<AuthenticationExceptionHandler> logger) : IExceptionHandler
+public class AuthenticationExceptionHandler(ILogger<AuthenticationExceptionHandler> logger) 
+	: IExceptionHandler
 {
-	private readonly ILogger<AuthenticationExceptionHandler> _logger = logger;
-
 	public async ValueTask<bool> TryHandleAsync(
 		HttpContext httpContext,
 		Exception exception,

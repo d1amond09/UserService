@@ -50,7 +50,7 @@ public class AuthController(ISender sender) : ControllerBase
 	[HttpPost("resend-confirmation-email")]
 	[ProducesResponseType(StatusCodes.Status202Accepted)]
 	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-	public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailRequest request)
+	public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailDto request)
 	{
 		await _sender.Send(new ResendConfirmationEmailCommand(request.Email));
 
@@ -59,7 +59,7 @@ public class AuthController(ISender sender) : ControllerBase
 
 	[HttpPost("forgot-password")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
-	public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+	public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto request)
 	{
 		await _sender.Send(new ForgotPasswordCommand(request.Email));
 

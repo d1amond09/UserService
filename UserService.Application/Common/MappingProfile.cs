@@ -10,6 +10,8 @@ public class MappingProfile : Profile
 	{
 		CreateMap<User, UserDtos>();
 		CreateMap<UserForRegistrationDto, User>();
+		CreateMap<UpdateUserDto, User>()
+			.ForMember(dest => dest.UserName, opt => opt.Ignore());
 
 		CreateMap<User, UserSummaryDto>();
 		CreateMap<User, UserDetailsDto>()

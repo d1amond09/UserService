@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using UserService.API.Contracts.Requests;
+using UserService.Application.Common.DTOs;
 using UserService.Application.UseCases.Users.AddUserToRole;
 using UserService.Application.UseCases.Users.RemoveUserFromRole;
 using UserService.Domain.Common.Constants;
@@ -18,7 +18,7 @@ namespace UserService.API.Controllers
 		
 		[Authorize(Roles = Roles.Admin)]
 		[HttpPost]
-		public async Task<IActionResult> AddUserToRole(Guid id, [FromBody] AddUserToRoleRequest request)
+		public async Task<IActionResult> AddUserToRole(Guid id, [FromBody] RoleDto request)
 		{
 			await _sender.Send(new AddUserToRoleCommand(id, request.RoleName));
 			return NoContent();

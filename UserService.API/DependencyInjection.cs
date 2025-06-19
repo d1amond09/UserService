@@ -7,8 +7,7 @@ namespace UserService.API;
 public static class DependencyInjection
 {
 	public static IServiceCollection AddPresentation(
-		this IServiceCollection services, 
-		IConfiguration configuration,
+		this IServiceCollection services,
 		IWebHostEnvironment environment)
 	{
 		services.AddProblemDetailsAsExceptionHandler(environment);
@@ -26,7 +25,7 @@ public static class DependencyInjection
 
 		services.AddControllers()
 			.AddJsonOptions(opts => 
-			opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+				opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 		services.AddEndpointsApiExplorer();
 

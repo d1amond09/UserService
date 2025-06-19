@@ -13,6 +13,10 @@ namespace UserService.Infrastructure.Users.Persistence;
 
 public class PictureRepository(AppDbContext db) : RepositoryBase<Picture>(db), IPictureRepository
 {
+	public async Task<Picture?> GetByIdAsync(Guid id) =>
+		await FindByCondition(p => p.Id.Equals(id))
+			.SingleOrDefaultAsync();
+
 	public async Task<Picture?> GetDefautPictureAsync() => 
 		await FindByCondition(p => p.Id
 			.Equals(Guid.Parse(Pictures.DefaultId)), false)

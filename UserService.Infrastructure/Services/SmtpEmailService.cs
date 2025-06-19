@@ -6,6 +6,7 @@ using UserService.Infrastructure.Common.Configuration;
 using MailKit.Net.Smtp;
 using MimeKit;
 using MailKit.Security;
+using UserService.Domain.Common;
 
 namespace UserService.Infrastructure.Services;
 
@@ -24,28 +25,28 @@ public class SmtpEmailService(IOptions<EmailSettings> emailOptions, IOptions<Web
 					  $"<a href='{confirmationLink}'>Confirm Email</a></p>" +
 					  "<p>Thank you!</p>";
 
-		await SendEmailAsync(user.Email ?? "", subject, body);
+		Message message = new([user.Email ?? ""], subject, body, null);
+
+		await SendEmailAsync(message);
 	}
 
-	private async Task SendEmailAsync(string to, string subject, string body)
+	private async Task SendEmailAsync(Message message)
 	{
-		var email = new MimeMessage();
-
-		email.From.Add(MailboxAddress.Parse(_emailSettings.From));
-		email.To.Add(MailboxAddress.Parse(to));
-		email.Subject = subject;
-		email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = body };
+		var email = CreateEmailMessage(message);
 
 		using var smtp = new SmtpClient();
+
 		await smtp.ConnectAsync(
 			_emailSettings.SmtpServer,
 			_emailSettings.Port,
 			SecureSocketOptions.StartTls
 		);
+		
 		await smtp.AuthenticateAsync(
 			_emailSettings.Username,
 			_emailSettings.Password
 		);
+		
 		await smtp.SendAsync(email);
 		await smtp.DisconnectAsync(true);
 	}
@@ -60,6 +61,34 @@ public class SmtpEmailService(IOptions<EmailSettings> emailOptions, IOptions<Web
 					  $"<p><a href='{resetLink}'>Reset Password</a></p>" +
 					  "<p>If you did not request a password reset, please ignore this email.</p>";
 
-		await SendEmailAsync(user.Email ?? "", subject, body);
+		Message message = new([user.Email ?? ""], subject, body, null);
+
+		await SendEmailAsync(message);
 	}
+
+	private MimeMessage CreateEmailMessage(Message message)
+	{
+		var email = new MimeMessage();
+		email.From.Add(MailboxAddress.Parse(_emailSettings.From));
+		email.To.AddRange(message.To.Select(MailboxAddress.Parse));
+		email.Subject = message.Subject;
+		email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = message.Content };
+		var bodyBuilder = new BodyBuilder { HtmlBody = message.Content };
+		if (message.Attachments != null && message.Attachments.Any())
+		{
+			byte[] fileBytes;
+			foreach (var attachment in message.Attachments)
+			{
+				using (var ms = new MemoryStream())
+				{
+					attachment.CopyTo(ms);
+					fileBytes = ms.ToArray();
+				}
+				bodyBuilder.Attachments.Add(attachment.FileName, fileBytes, ContentType.Parse(attachment.ContentType));
+			}
+		}
+		email.Body = bodyBuilder.ToMessageBody();
+		return email;
+	}
+
 }

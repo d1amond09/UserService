@@ -1,8 +1,6 @@
 ﻿using UserService.Application.Common.RequestFeatures.ModelParameters;
-using UserService.Application.UseCases.Users.UnblockUser;
 using UserService.Application.UseCases.Users.DeleteUser;
 using UserService.Application.UseCases.Users.GetUserMe;
-using UserService.Application.UseCases.Users.BlockUser;
 using UserService.Application.UseCases.Users.GetUsers;
 using UserService.Application.Common.DTOs;
 using UserService.Domain.Common.Constants;
@@ -10,9 +8,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using MediatR;
-using UserService.Application.Common.RequestFeatures;
-using UserService.Application.UseCases.Users.AddUserToRole;
 using UserService.Application.UseCases.Users.GetUserById;
+using UserService.Application.UseCases.Users.UpdateUser;
+using UserService.Application.UseCases.Users.UpdateUserByAdmin;
+using UserService.Application.UseCases.Users.UpdateUserStatus;
 
 namespace UserService.API.Controllers;
 
@@ -47,26 +46,44 @@ public class UsersController(ISender sender) : ControllerBase
 		return Ok(userList);
 	}
 
-	[HttpPut("{id:guid}/block")]
-	[Authorize(Roles = Roles.Admin)]
+	[HttpPut("{id:guid}")] 
+	[Authorize(Roles = "Admin")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
-	public async Task<IActionResult> BlockUser(Guid id)
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> UpdateUserByAdmin(Guid id, [FromBody] UpdateUserDto request)
 	{
-		await _sender.Send(new BlockUserCommand(id));
+		await _sender.Send(new UpdateUserByAdminCommand(id, request));
 		return NoContent();
 	}
 
-	[HttpPut("{id:guid}/unblock")]
-	[Authorize(Roles = Roles.Admin)]
+	[Authorize]
+	[HttpPut("me")]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
-	public async Task<IActionResult> UnblockUser(Guid id)
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto request)
 	{
-		await _sender.Send(new UnblockUserCommand(id));
+		await _sender.Send(new UpdateUserCommand(request));
+		return NoContent();
+	}
+
+	[HttpPatch("{id:guid}/status")]
+	[Authorize(Roles = "Admin")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> UpdateUserStatus(Guid id, [FromBody] UserStatusDto request)
+	{
+		var command = new UpdateUserStatusCommand(id, request.Action);
+		await _sender.Send(command);
+
 		return NoContent();
 	}
 
 	[HttpDelete("{id:guid}")]
-	//[Authorize(Roles = Roles.User)]
+	[Authorize(Roles = Roles.Admin)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
 	public async Task<IActionResult> DeleteUser(Guid id)
 	{
