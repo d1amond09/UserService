@@ -1,7 +1,6 @@
 ﻿using UserService.Application.Common.DTOs;
 using UserService.Application.Common.RequestFeatures;
 using MediatR;
-using UserService.Application.Common.Responses;
 using AutoMapper;
 using UserService.Application.Common.Interfaces;
 using UserService.Domain.Users;

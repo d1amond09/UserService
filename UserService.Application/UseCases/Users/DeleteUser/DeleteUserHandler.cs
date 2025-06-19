@@ -1,5 +1,4 @@
 ﻿using UserService.Application.Common.Interfaces;
-using UserService.Application.Common.Responses;
 using UserService.Domain.Users;
 using MediatR;
 using Microsoft.AspNetCore.Identity;

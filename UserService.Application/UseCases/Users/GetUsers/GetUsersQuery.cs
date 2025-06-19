@@ -1,5 +1,4 @@
 ﻿using UserService.Application.Common.RequestFeatures.ModelParameters;
-using UserService.Application.Common.Responses;
 using MediatR;
 using UserService.Application.Common.RequestFeatures;
 using UserService.Domain.Users;

@@ -1,5 +1,4 @@
-﻿using UserService.Application.Common.Responses;
-using MediatR;
+﻿using MediatR;
 
 namespace UserService.Application.UseCases.Users.DeleteUser;
 

@@ -1,5 +1,4 @@
-﻿using UserService.Application.Common.Responses;
-using MediatR;
+﻿using MediatR;
 using UserService.Application.Common.DTOs;
 
 namespace UserService.Application.UseCases.Users.GetUserMe;
