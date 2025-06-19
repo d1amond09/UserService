@@ -28,6 +28,7 @@ public class AuthController(ISender sender) : ControllerBase
 	}
 
 	[HttpPost("login", Name = "SignIn")]
+	[ProducesResponseType(typeof(TokenDto), StatusCodes.Status200OK)]
 	public async Task<IActionResult> LoginUser([FromBody] UserForLoginDto userForLogin)
 	{
 		TokenDto tokenDto = await _sender.Send(new LoginUserCommand(userForLogin));
