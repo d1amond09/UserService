@@ -13,20 +13,16 @@ namespace UserService.Application.UseCases.Auth.RegisterUser;
 public class RegisterUserHandler(UserManager<User> userManager, IMapper mapper, IEmailService emailService) 
 	: IRequestHandler<RegisterUserCommand, Guid>
 {
-	private readonly IEmailService _emailService = emailService;
-	private readonly UserManager<User> _userManager = userManager;
-	private readonly IMapper _mapper = mapper;
-
 	public async Task<Guid> Handle(RegisterUserCommand request, CancellationToken ct)
 	{
 		var email = request.UserForRegistrationDto.Email;
 
-		User user = _mapper.Map<User>(request.UserForRegistrationDto);
+		User user = mapper.Map<User>(request.UserForRegistrationDto);
 
 		string password = request.UserForRegistrationDto.Password 
 			?? throw new BadRequestException("Password is null");
 		
-		var result = await _userManager.CreateAsync(user, password);
+		var result = await userManager.CreateAsync(user, password);
 
 		if (!result.Succeeded)
 		{
@@ -36,11 +32,11 @@ public class RegisterUserHandler(UserManager<User> userManager, IMapper mapper, 
 			throw new ValidationException(errors);
 		}
 
-		await _userManager.AddToRoleAsync(user, "User");
+		await userManager.AddToRoleAsync(user, Roles.User);
 
-		var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+		var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 		
-		await _emailService.SendEmailConfirmationAsync(user, token);
+		await emailService.SendEmailConfirmationAsync(user, token);
 
 		return user.Id;
 	}

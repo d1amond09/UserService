@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 using UserService.API;
 using UserService.Application;
@@ -27,6 +29,11 @@ try
 
 	app.UseSerilogRequestLogging();
 
+	app.UseForwardedHeaders(new ForwardedHeadersOptions
+	{
+		ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+	});
+
 	if (app.Environment.IsDevelopment())
 	{
 		app.UseSwagger();
@@ -34,6 +41,7 @@ try
 	}
 
 	app.UseExceptionHandler();
+	app.UseCors();
 	app.UseHttpsRedirection();
 	app.UseAuthentication();
 	app.UseAuthorization();

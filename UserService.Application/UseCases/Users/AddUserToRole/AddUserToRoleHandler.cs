@@ -2,29 +2,24 @@
 using UserService.Domain.Users;
 using MediatR;
 using UserService.Application.Common.Exceptions;
-using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Application.UseCases.Users.AddUserToRole;
 
-public class AddUserToRoleHandler(IUserRepository userRep, UserManager<User> userManager, RoleManager<Role> roleManager) 
+public class AddUserToRoleHandler(UserManager<User> userManager, RoleManager<Role> roleManager) 
 	: IRequestHandler<AddUserToRoleCommand>
 {
-	private readonly IUserRepository _userRep = userRep;
-	private readonly UserManager<User> _userManager = userManager;
-	private readonly RoleManager<Role> _roleManager = roleManager; 
-
 	public async Task Handle(AddUserToRoleCommand request, CancellationToken ct)
 	{
-		User user = await _userRep.GetByIdAsync(request.UserId, ct)
+		User user = await userManager.FindByIdAsync(request.UserId.ToString())
 			?? throw new NotFoundException($"User with ID '{request.UserId}'");
 
-		if (!await _roleManager.RoleExistsAsync(request.RoleName))
+		if (!await roleManager.RoleExistsAsync(request.RoleName))
 			throw new BadRequestException($"Role '{request.RoleName}' does not exist.");
 
-		if (await _userManager.IsInRoleAsync(user, request.RoleName))
+		if (await userManager.IsInRoleAsync(user, request.RoleName))
 			return;
 
-		var result = await _userManager.AddToRoleAsync(user, request.RoleName);
+		var result = await userManager.AddToRoleAsync(user, request.RoleName);
 
 		if (!result.Succeeded)
 		{

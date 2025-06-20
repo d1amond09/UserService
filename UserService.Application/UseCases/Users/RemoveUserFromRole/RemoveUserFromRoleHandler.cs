@@ -6,25 +6,21 @@ using UserService.Application.Common.Interfaces.Persistence;
 
 namespace UserService.Application.UseCases.Users.RemoveUserFromRole;
 
-public class RemoveUserFromRoleHandler(IUserRepository userRep, UserManager<User> userManager, RoleManager<Role> roleManager) 
+public class RemoveUserFromRoleHandler(UserManager<User> userManager, RoleManager<Role> roleManager) 
 	: IRequestHandler<RemoveUserFromRoleCommand>
 {
-	private readonly IUserRepository _userRep = userRep;
-	private readonly UserManager<User> _userManager = userManager;
-	private readonly RoleManager<Role> _roleManager = roleManager; 
-
 	public async Task Handle(RemoveUserFromRoleCommand request, CancellationToken ct)
 	{
-		User user = await _userRep.GetByIdAsync(request.UserId, ct)
-			?? throw new NotFoundException($"User with ID '{request.UserId}'");
-
-		if (!await _roleManager.RoleExistsAsync(request.RoleName))
+		if (!await roleManager.RoleExistsAsync(request.RoleName))
 			throw new BadRequestException($"Role '{request.RoleName}' does not exist.");
 
-		if (await _userManager.IsInRoleAsync(user, request.RoleName))
-			return;
+		User user = await userManager.FindByIdAsync(request.UserId.ToString())
+			?? throw new NotFoundException($"User with ID '{request.UserId}'");
 
-		var result = await _userManager.RemoveFromRoleAsync(user, request.RoleName);
+		if (!await userManager.IsInRoleAsync(user, request.RoleName))
+			throw new BadRequestException($"User is not in role '{request.RoleName}'.");
+
+		var result = await userManager.RemoveFromRoleAsync(user, request.RoleName);
 
 		if (!result.Succeeded)
 		{

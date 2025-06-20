@@ -14,14 +14,12 @@ public static class DependencyInjection
 		services.AddSwagger();
 		services.AddCors(options =>
 		{
-			options.AddPolicy("CorsPolicy", builder =>
-			builder.AllowAnyOrigin()
-			.AllowAnyMethod()
-			.AllowAnyHeader()
-			.WithExposedHeaders("X-Pagination"));
+			options.AddDefaultPolicy(builder => 
+				builder.AllowAnyOrigin()
+					.AllowAnyHeader()
+					.AllowAnyMethod()
+					.WithExposedHeaders("X-Pagination"));
 		});
-
-		services.AddAuthentication();
 
 		services.AddControllers()
 			.AddJsonOptions(opts => 

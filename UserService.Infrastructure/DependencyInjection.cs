@@ -21,6 +21,7 @@ using Microsoft.Extensions.Options;
 using UserService.Infrastructure.Security;
 using UserService.Infrastructure.Common.Configuration;
 using UserService.Infrastructure.Security.CustomTokenProviders;
+using Microsoft.AspNetCore.Http;
 
 namespace UserService.Infrastructure;
 
@@ -54,6 +55,7 @@ public static class DependencyInjection
 	{
 		services.AddScoped<ICloudinaryService, CloudinaryService>();
 		services.AddScoped<IEmailService, SmtpEmailService>();
+		services.AddScoped<IExternalAuthService, GoogleAuthService>();
 
 		return services;
 	}
@@ -81,23 +83,34 @@ public static class DependencyInjection
 		services.AddScoped<ICurrentUserService, CurrentUserService>();
 		services.AddScoped<ITokenService, TokenService>();
 
+		var googleAuthSettings = new GoogleAuthSettings();
+		configuration.GetSection($"Authentication:{GoogleAuthSettings.SectionName}").Bind(googleAuthSettings);
+		services.AddSingleton(Options.Create(googleAuthSettings));
+
 		var jwtSettings = new JwtSettings();
 		configuration.Bind(JwtSettings.SectionName, jwtSettings);
 		services.AddSingleton(Options.Create(jwtSettings));
 
-		services
+		var authBuilder = services
 		.AddAuthentication(opts =>
 		{
 			opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 			opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 			opts.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-		})
-		.AddJwtBearer(opts =>
+		});
+		authBuilder.AddJwtBearer(opts =>
 		{
 			opts.TokenValidationParameters = TokenValidationParametersFactory.Create(
 				jwtSettings,
 				validateLifetime: true
 			);
+		});
+		authBuilder.AddGoogle(options =>
+		{
+			options.ClientId = googleAuthSettings.ClientId;
+			options.ClientSecret = googleAuthSettings.ClientSecret;
+			options.CallbackPath = "/signin-google";
+			options.Scope.Add("profile");
 		});
 
 		return services;
