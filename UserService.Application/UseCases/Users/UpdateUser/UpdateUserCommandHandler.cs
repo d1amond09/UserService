@@ -2,7 +2,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using UserService.Application.Common.Exceptions;
+using UserService.Application.Common.Helpers;
 using UserService.Application.Common.Interfaces;
+using UserService.Application.Common.Notifications;
 using UserService.Domain.Users;
 
 namespace UserService.Application.UseCases.Users.UpdateUser;
@@ -11,7 +13,7 @@ public class UpdateUserCommandHandler(
 	UserManager<User> userManager,
 	ICurrentUserService currentUserService,
 	IMapper mapper,
-	IUserCacheService userCacheService) : IRequestHandler<UpdateUserCommand>
+	IPublisher publisher) : IRequestHandler<UpdateUserCommand>
 {
 	public async Task Handle(UpdateUserCommand request, CancellationToken ct)
 	{
@@ -43,6 +45,7 @@ public class UpdateUserCommandHandler(
 			throw new ValidationException(errors);
 		}
 
-		await userCacheService.InvalidateUserCacheAsync(userId, ct);
+		var cacheKey = CacheKeyGenerator.GetUserCacheKey(userId);
+		await publisher.Publish(new CacheInvalidationNotification(cacheKey), ct);
 	}
 }

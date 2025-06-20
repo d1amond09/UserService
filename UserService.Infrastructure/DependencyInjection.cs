@@ -60,7 +60,6 @@ public static class DependencyInjection
 		services.AddScoped<ICloudinaryService, CloudinaryService>();
 		services.AddScoped<IEmailService, SmtpEmailService>();
 		services.AddScoped<IExternalAuthService, GoogleAuthService>();
-		services.AddScoped<IUserCacheService, UserCacheService>();
 
 		return services;
 	}

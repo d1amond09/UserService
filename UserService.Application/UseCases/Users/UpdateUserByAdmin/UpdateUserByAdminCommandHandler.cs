@@ -4,7 +4,9 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Distributed;
 using UserService.Application.Common.Exceptions;
+using UserService.Application.Common.Helpers;
 using UserService.Application.Common.Interfaces;
+using UserService.Application.Common.Notifications;
 using UserService.Application.UseCases.Users.GetUserById;
 using UserService.Application.UseCases.Users.UpdateUser;
 using UserService.Domain.Users;
@@ -13,8 +15,8 @@ namespace UserService.Application.UseCases.Users.UpdateUserByAdmin;
 
 public class UpdateUserByAdminCommandHandler(
 	UserManager<User> userManager,
-	IUserCacheService userCacheService,
-	IMapper mapper) : IRequestHandler<UpdateUserByAdminCommand>
+	IMapper mapper,
+	IPublisher publisher) : IRequestHandler<UpdateUserByAdminCommand>
 {
 	public async Task Handle(UpdateUserByAdminCommand request, CancellationToken ct)
 	{
@@ -43,6 +45,7 @@ public class UpdateUserByAdminCommandHandler(
 			throw new ValidationException(errors);
 		}
 
-		await userCacheService.InvalidateUserCacheAsync(request.UserId, ct);
+		var cacheKey = CacheKeyGenerator.GetUserCacheKey(request.UserId);
+		await publisher.Publish(new CacheInvalidationNotification(cacheKey), ct);
 	}
 }

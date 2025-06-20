@@ -4,13 +4,15 @@ using MediatR;
 using UserService.Application.Common.Exceptions;
 using UserService.Application.Common.Interfaces.Persistence;
 using UserService.Application.Common.Interfaces;
+using UserService.Application.Common.Helpers;
+using UserService.Application.Common.Notifications;
 
 namespace UserService.Application.UseCases.Users.RemoveUserFromRole;
 
 public class RemoveUserFromRoleHandler(
 	UserManager<User> userManager, 
 	RoleManager<Role> roleManager,
-	IUserCacheService userCacheService) 
+	IPublisher publisher) 
 	: IRequestHandler<RemoveUserFromRoleCommand>
 {
 	public async Task Handle(RemoveUserFromRoleCommand request, CancellationToken ct)
@@ -33,6 +35,7 @@ public class RemoveUserFromRoleHandler(
 			throw new ValidationException(errors);
 		}
 
-		await userCacheService.InvalidateUserCacheAsync(request.UserId, ct);
+		var cacheKey = CacheKeyGenerator.GetUserCacheKey(request.UserId);
+		await publisher.Publish(new CacheInvalidationNotification(cacheKey), ct);
 	}
 }

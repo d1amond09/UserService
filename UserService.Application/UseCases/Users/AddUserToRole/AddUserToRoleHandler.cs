@@ -3,13 +3,15 @@ using UserService.Domain.Users;
 using MediatR;
 using UserService.Application.Common.Exceptions;
 using UserService.Application.Common.Interfaces;
+using UserService.Application.Common.Helpers;
+using UserService.Application.Common.Notifications;
 
 namespace UserService.Application.UseCases.Users.AddUserToRole;
 
 public class AddUserToRoleHandler(
 	UserManager<User> userManager, 
 	RoleManager<Role> roleManager,
-	IUserCacheService userCacheService) 
+	IPublisher publisher) 
 	: IRequestHandler<AddUserToRoleCommand>
 {
 	public async Task Handle(AddUserToRoleCommand request, CancellationToken ct)
@@ -32,6 +34,7 @@ public class AddUserToRoleHandler(
 			throw new ValidationException(errors);
 		}
 
-		await userCacheService.InvalidateUserCacheAsync(request.UserId, ct);
+		var cacheKey = CacheKeyGenerator.GetUserCacheKey(request.UserId);
+		await publisher.Publish(new CacheInvalidationNotification(cacheKey), ct);
 	}
 }
