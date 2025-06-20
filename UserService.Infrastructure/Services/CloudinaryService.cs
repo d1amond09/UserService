@@ -2,15 +2,20 @@
 using Microsoft.AspNetCore.Http;
 using CloudinaryDotNet.Actions;
 using CloudinaryDotNet;
+using UserService.Infrastructure.Common.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace UserService.Infrastructure.Services;
 
 public class CloudinaryService : ICloudinaryService
 {
+	private readonly CloudinarySettings _cloudinarySettings;
 	private readonly Cloudinary _cloudinary;
-	public CloudinaryService()
+
+	public CloudinaryService(IOptions<CloudinarySettings> cloudinarySettings)
 	{
-		var account = new Account("dkhfoludi", "589415463274842", "bMEIYsSxPP_g3NhSz21x2h32Vr0");
+		_cloudinarySettings = cloudinarySettings.Value; 
+		Account account = new (_cloudinarySettings.Cloud, _cloudinarySettings.ApiKey, _cloudinarySettings.ApiSecret);
 		_cloudinary = new Cloudinary(account);
 		_cloudinary.Api.Secure = true;
 	}
@@ -23,7 +28,7 @@ public class CloudinaryService : ICloudinaryService
 		var uploadParams = new ImageUploadParams
 		{
 			File = new FileDescription(file.FileName, stream),
-			Folder = "templates",
+			Folder = _cloudinarySettings.Folder,
 		};
 
 		var uploadResult = await _cloudinary.UploadAsync(uploadParams);
