@@ -1,8 +1,11 @@
-﻿using AutoMapper;
+﻿using System.Text.Json;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Distributed;
 using UserService.Application.Common.Exceptions;
 using UserService.Application.Common.Interfaces;
+using UserService.Application.UseCases.Users.GetUserById;
 using UserService.Application.UseCases.Users.UpdateUser;
 using UserService.Domain.Users;
 
@@ -10,9 +13,10 @@ namespace UserService.Application.UseCases.Users.UpdateUserByAdmin;
 
 public class UpdateUserByAdminCommandHandler(
 	UserManager<User> userManager,
+	IUserCacheService userCacheService,
 	IMapper mapper) : IRequestHandler<UpdateUserByAdminCommand>
 {
-	public async Task Handle(UpdateUserByAdminCommand request, CancellationToken cancellationToken)
+	public async Task Handle(UpdateUserByAdminCommand request, CancellationToken ct)
 	{
 		var userToUpdate = await userManager.FindByIdAsync(request.UserId.ToString())
 			?? throw new NotFoundException($"User with ID '{request.UserId}' not found.");
@@ -38,5 +42,7 @@ public class UpdateUserByAdminCommandHandler(
 					.ToDictionary(e => e.Code, e => new[] { e.Description });
 			throw new ValidationException(errors);
 		}
+
+		await userCacheService.InvalidateUserCacheAsync(request.UserId, ct);
 	}
 }

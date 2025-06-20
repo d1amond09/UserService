@@ -19,7 +19,7 @@ public class GetUsersHandler(IUserRepository userRep, IMapper mapper)
 	{
 		var pagedUsers = await _userRep.GetAllAsync(request.Parameters, ct);
 
-		var userDtos = _mapper.Map<IEnumerable<UserDetailsDto>>(pagedUsers);
+		var userDtos = _mapper.Map<List<UserDetailsDto>>(pagedUsers.Items);
 
 		return new PagedList<UserDetailsDto>(userDtos, pagedUsers.MetaData);
 	}

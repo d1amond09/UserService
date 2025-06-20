@@ -42,8 +42,9 @@ public record UserForLoginDto
 }
 
 public record UserSummaryDto(Guid Id, string UserName, string Email);
-public record UserDetailsDto(Guid Id, string UserName, string Email, string? FirstName, string? LastName, bool IsBlocked)
+public record UserDetailsDto(Guid Id, string UserName, string Email, string? FirstName, string? LastName)
 {
+	public bool IsBlocked { get; init; }
 	public string? PictureUrl { get; set; }
 	public IList<string> Roles { get; set; } = [];
 }

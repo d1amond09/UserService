@@ -3,10 +3,14 @@ using UserService.Domain.Users;
 using MediatR;
 using UserService.Application.Common.Exceptions;
 using UserService.Application.Common.Interfaces.Persistence;
+using UserService.Application.Common.Interfaces;
 
 namespace UserService.Application.UseCases.Users.RemoveUserFromRole;
 
-public class RemoveUserFromRoleHandler(UserManager<User> userManager, RoleManager<Role> roleManager) 
+public class RemoveUserFromRoleHandler(
+	UserManager<User> userManager, 
+	RoleManager<Role> roleManager,
+	IUserCacheService userCacheService) 
 	: IRequestHandler<RemoveUserFromRoleCommand>
 {
 	public async Task Handle(RemoveUserFromRoleCommand request, CancellationToken ct)
@@ -28,5 +32,7 @@ public class RemoveUserFromRoleHandler(UserManager<User> userManager, RoleManage
 				.ToDictionary(e => e.Code, e => new[] { e.Description });
 			throw new ValidationException(errors);
 		}
+
+		await userCacheService.InvalidateUserCacheAsync(request.UserId, ct);
 	}
 }

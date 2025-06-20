@@ -17,8 +17,6 @@ public class TokenValidationParametersFactory
 			ValidIssuer = settings.ValidIssuer,
 			ValidAudience = settings.ValidAudience,
 			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.Secret)),
-
-			ClockSkew = TimeSpan.Zero
 		};
 	}
 }

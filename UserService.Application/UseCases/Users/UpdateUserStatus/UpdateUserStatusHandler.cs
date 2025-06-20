@@ -12,7 +12,9 @@ using UserService.Domain.Users;
 
 namespace UserService.Application.UseCases.Users.UpdateUserStatus;
 
-public class UpdateUserStatusCommandHandler(UserManager<User> userManager) 
+public class UpdateUserStatusCommandHandler(
+	UserManager<User> userManager,
+	IUserCacheService userCacheService) 
 	: IRequestHandler<UpdateUserStatusCommand>
 {
 	public async Task Handle(UpdateUserStatusCommand request, CancellationToken ct)
@@ -33,5 +35,7 @@ public class UpdateUserStatusCommandHandler(UserManager<User> userManager)
 					.ToDictionary(e => e.Code, e => new[] { e.Description });
 			throw new ValidationException(errors);
 		}
+
+		await userCacheService.InvalidateUserCacheAsync(request.UserId, ct);
 	}
 }

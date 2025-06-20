@@ -45,7 +45,7 @@ public class UsersController(ISender sender) : ControllerBase
 
 		Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(userList.MetaData));
 
-		return Ok(userList);
+		return Ok(userList.Items);
 	}
 
 	[Authorize(Roles = "Admin")]

@@ -19,12 +19,12 @@ public class ExternalLoginCommandHandler(
 		var externalUser = await externalAuthService.ValidateGoogleTokenAsync(request.IdToken);
 		var loginInfo = new UserLoginInfo(externalUser.Provider, externalUser.ProviderKey, externalUser.Provider);
 
-		var user = await FindOrCreateUserAsync(loginInfo, externalUser, ct);
+		var user = await FindOrCreateUserAsync(loginInfo, externalUser);
 
 		return await tokenService.CreateTokensAsync(user);
 	}
 
-	private async Task<User> FindOrCreateUserAsync(UserLoginInfo loginInfo, ExternalUserDto externalUser, CancellationToken ct)
+	private async Task<User> FindOrCreateUserAsync(UserLoginInfo loginInfo, ExternalUserDto externalUser)
 	{
 		var user = await userManager.FindByLoginAsync(loginInfo.LoginProvider, loginInfo.ProviderKey);
 		if (user != null)

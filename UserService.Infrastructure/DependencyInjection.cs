@@ -35,6 +35,7 @@ public static class DependencyInjection
 			.AddHttpContextAccessor()
 			.AddConfigurations(config)
 			.AddServices()
+			.AddCacheRedis(config)
 			.AddAuthorization()
 			.AddConfigIdentity()
 			.AddAuthentication(config)
@@ -48,6 +49,9 @@ public static class DependencyInjection
 		services.Configure<WebAppSettings>(config.GetSection(WebAppSettings.SectionName));
 		services.Configure<JwtSettings>(config.GetSection(JwtSettings.SectionName));
 		services.Configure<EmailSettings>(config.GetSection(EmailSettings.SectionName));
+		services.Configure<CloudinarySettings>(config.GetSection(CloudinarySettings.SectionName));
+		services.Configure<CacheSettings>(config.GetSection(CacheSettings.SectionName));
+
 		return services;
 	}
 
@@ -56,6 +60,7 @@ public static class DependencyInjection
 		services.AddScoped<ICloudinaryService, CloudinaryService>();
 		services.AddScoped<IEmailService, SmtpEmailService>();
 		services.AddScoped<IExternalAuthService, GoogleAuthService>();
+		services.AddScoped<IUserCacheService, UserCacheService>();
 
 		return services;
 	}
@@ -77,6 +82,21 @@ public static class DependencyInjection
 
 		return services;
 	}
+
+	private static IServiceCollection AddCacheRedis(this IServiceCollection services, IConfiguration configuration)
+	{
+		var cacheSettings = new CacheSettings();
+		configuration.Bind(CacheSettings.SectionName, cacheSettings);
+		services.AddSingleton(Options.Create(cacheSettings));
+
+		services.AddStackExchangeRedisCache(options =>
+		{
+			options.Configuration = cacheSettings.ConnectionString;
+			options.InstanceName = cacheSettings.InstanceName;
+		});
+		return services;
+	}
+
 
 	private static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{

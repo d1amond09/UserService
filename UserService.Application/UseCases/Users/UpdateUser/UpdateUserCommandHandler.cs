@@ -10,14 +10,15 @@ namespace UserService.Application.UseCases.Users.UpdateUser;
 public class UpdateUserCommandHandler(
 	UserManager<User> userManager,
 	ICurrentUserService currentUserService,
-	IMapper mapper) : IRequestHandler<UpdateUserCommand>
+	IMapper mapper,
+	IUserCacheService userCacheService) : IRequestHandler<UpdateUserCommand>
 {
-	public async Task Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+	public async Task Handle(UpdateUserCommand request, CancellationToken ct)
 	{
-		var userId = currentUserService.UserId
+		Guid userId = currentUserService.UserId
 			?? throw new UnauthorizedAccessException();
 
-		var userToUpdate = await userManager.FindByIdAsync(userId.ToString())
+		User userToUpdate = await userManager.FindByIdAsync(userId.ToString())
 			?? throw new NotFoundException($"User with ID '{userId}' not found.");
 
 		mapper.Map(request.Dto, userToUpdate);
@@ -41,5 +42,7 @@ public class UpdateUserCommandHandler(
 					.ToDictionary(e => e.Code, e => new[] { e.Description });
 			throw new ValidationException(errors);
 		}
+
+		await userCacheService.InvalidateUserCacheAsync(userId, ct);
 	}
 }

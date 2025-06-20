@@ -1,26 +1,32 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 
 namespace UserService.Application.Common.RequestFeatures;
 
-public class PagedList<T> : List<T>
+public class PagedList<T> 
 {
-	public MetaData MetaData { get; set; }
-	public PagedList(IEnumerable<T> items, int count, int pageNumber, int pageSize)
+	public List<T> Items { get; } = [];
+	public MetaData? MetaData { get; set; }
+
+	public PagedList(List<T> items, int count, int pageNumber, int pageSize)
 	{
+		Items = items;
 		MetaData = new MetaData
 		{
 			TotalCount = count,
 			PageSize = pageSize,
 			CurrentPage = pageNumber,
 		};
-		AddRange(items);
 	}
 
-	public PagedList(IEnumerable<T> items, MetaData metaData)
+	[JsonConstructor]
+	public PagedList(List<T> items, MetaData metaData)
 	{
+		Items = items;
 		MetaData = metaData;
-		AddRange(items);
 	}
+
+	protected PagedList() { }
 
 	public static PagedList<T> ToPagedList(IEnumerable<T> source, int pageNumber, int pageSize)
 	{
