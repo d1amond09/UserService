@@ -23,7 +23,7 @@ try
 	builder.Services
 		.AddInfrastructure(builder.Configuration)
 		.AddApplication()
-		.AddPresentation(builder.Environment);
+		.AddPresentation(builder.Configuration, builder.Environment);
 
 	var app = builder.Build();
 
