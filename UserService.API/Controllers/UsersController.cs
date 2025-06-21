@@ -37,7 +37,7 @@ public class UsersController(ISender sender) : ControllerBase
 		return Ok(userDetails);
 	}
 
-	[Authorize]
+	//[Authorize]
 	[HttpGet]
 	public async Task<IActionResult> GetUsers([FromQuery] UserParameters userParameters)
 	{
