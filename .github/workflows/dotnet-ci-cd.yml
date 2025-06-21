@@ -52,7 +52,7 @@ jobs:
         context: . 
         file: ./UserService.API/Dockerfile 
         push: true 
-        tags: ${{ secrets.DOCKER_USERNAME }}/user-service-api:latest
+        tags: d1amond9/user-service-api:latest
     
     - name: Complete workflow
       run: echo "Workflow completed successfully!"
