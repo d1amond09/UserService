@@ -49,8 +49,8 @@ jobs:
     - name: Set image name to lowercase
       id: image_name
       run: |
-         IMAGE_NAME_UC="${{ github.repository }}"
-          echo "IMAGE_NAME_LC=${IMAGE_NAME_UC,,}" >> $GITHUB_ENV
+        IMAGE_NAME_UC="${{ github.repository }}"
+        echo "IMAGE_NAME_LC=${IMAGE_NAME_UC,,}" >> $GITHUB_ENV
           
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
@@ -58,15 +58,7 @@ jobs:
         context: . 
         file: ./UserService.API/Dockerfile 
         push: true 
-        tags: ghcr.io/${{ env.IMAGE_NAME_LC }}:latest
-    
-    - name: Run application in Docker
-      run: |
-        docker run -d -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} --name myapp d1amond9/events-web-app-api:latest
-    
-    - name: Get container logs
-      run: |
-        docker logs myapp
+        tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME_LC }}:latest
     
     - name: Complete workflow
       run: echo "Workflow completed successfully!"
