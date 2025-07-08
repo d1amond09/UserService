@@ -1,27 +1,29 @@
 ﻿using System.Configuration;
 using System.Diagnostics;
 using System.Text;
-using UserService.Application.Common.DTOs;
-using UserService.Application.Common.Interfaces;
-using UserService.Domain.Users;
-using UserService.Infrastructure.Common.Persistence;
-using UserService.Infrastructure.Users.Persistence;
+using InnoShop.Contracts.Events;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using UserService.Infrastructure.Services;
-using UserService.Application.Common.Interfaces.Persistence;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using UserService.Infrastructure.Security;
+using Microsoft.IdentityModel.Tokens;
+using UserService.Application.Common.DTOs;
+using UserService.Application.Common.Interfaces;
+using UserService.Application.Common.Interfaces.Persistence;
+using UserService.Domain.Users;
 using UserService.Infrastructure.Common.Configuration;
+using UserService.Infrastructure.Common.Persistence;
+using UserService.Infrastructure.Security;
 using UserService.Infrastructure.Security.CustomTokenProviders;
-using Microsoft.AspNetCore.Http;
+using UserService.Infrastructure.Services;
+using UserService.Infrastructure.Users.Persistence;
 
 namespace UserService.Infrastructure;
 
@@ -35,6 +37,7 @@ public static class DependencyInjection
 			.AddHttpContextAccessor()
 			.AddConfigurations(config)
 			.AddServices()
+			.AddRabbitMq(config)
 			.AddCacheRedis(config)
 			.AddAuthorization()
 			.AddConfigIdentity()
@@ -80,6 +83,29 @@ public static class DependencyInjection
 
 		services.AddScoped<IUserRepository, UserRepository>();
 		services.AddScoped<IPictureRepository, PictureRepository>();
+
+		return services;
+	}
+
+	private static IServiceCollection AddRabbitMq(this IServiceCollection services, IConfiguration config)
+	{
+		services.AddMassTransit(busConfigurator =>
+		{
+			busConfigurator.UsingRabbitMq((context, configurator) =>
+			{
+				var host = config["MessageBroker:Host"];
+				configurator.Host(host, h =>
+				{
+					h.Username(config["MessageBroker:Username"] ?? "");
+					h.Password(config["MessageBroker:Password"] ?? "");
+				});
+
+				configurator.ReceiveEndpoint("product-service-user-status-changed", e =>
+				{
+					e.Bind<UserStatusChanged>();
+				});
+			});
+		});
 
 		return services;
 	}

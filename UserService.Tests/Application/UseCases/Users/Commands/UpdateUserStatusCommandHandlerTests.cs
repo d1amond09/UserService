@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AutoFixture;
 using FluentAssertions;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Moq;
@@ -19,6 +20,7 @@ public class UpdateUserStatusCommandHandlerTests
 {
 	private readonly Mock<UserManager<User>> _userManagerMock;
 	private readonly Mock<IPublisher> _publisherMock;
+	private readonly Mock<IPublishEndpoint> _publisherEndpointMock;
 	private readonly UpdateUserStatusCommandHandler _handler;
 	private readonly Fixture _fixture;
 
@@ -29,10 +31,12 @@ public class UpdateUserStatusCommandHandlerTests
 		var store = new Mock<IUserStore<User>>();
 		_userManagerMock = new Mock<UserManager<User>>(store.Object, null, null, null, null, null, null, null, null);
 
+		_publisherEndpointMock = new Mock<IPublishEndpoint>();
 		_publisherMock = new Mock<IPublisher>();
 
 		_handler = new UpdateUserStatusCommandHandler(
 			_userManagerMock.Object,
+			_publisherEndpointMock.Object,
 			_publisherMock.Object);
 	}
 
