@@ -30,7 +30,7 @@ jobs:
           <packageSourceCredentials>
             <github>
               <add key=\"Username\" value=\"d1amond09\" />
-              <add key=\"ClearTextPassword\" value=\"${{ secrets.NUGET_FEED_ACCESS }}\" />
+              <add key=\"ClearTextPassword\" value=\"${{ secrets.PAT_FOR_NUGET }}\" />
             </github>
           </packageSourceCredentials>
         </configuration>" > nuget.config
@@ -80,7 +80,7 @@ jobs:
             <packageSourceCredentials>
               <github>
                 <add key=\"Username\" value=\"d1amond09\" />
-                <add key=\"ClearTextPassword\" value=\"${{ secrets.NUGET_FEED_ACCESS }}\" />
+                <add key=\"ClearTextPassword\" value=\"${{ secrets.PAT_FOR_NUGET }}\" />
               </github>
             </packageSourceCredentials>
           </configuration>"
