@@ -21,20 +21,8 @@ jobs:
         
     - name: Create nuget.config for private packages
       run: |
-        echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
-        <configuration>
-          <packageSources>
-            <add key=\"nuget.org\" value=\"https://api.nuget.org/v3/index.json\" protocolVersion=\"3\" />
-            <add key=\"github\" value=\"https://nuget.pkg.github.com/d1amond09/index.json\" />
-          </packageSources>
-          <packageSourceCredentials>
-            <github>
-              <add key=\"Username\" value=\"d1amond09\" />
-              <add key=\"ClearTextPassword\" value=\"${{ secrets.PAT_FOR_NUGET }}\" />
-            </github>
-          </packageSourceCredentials>
-        </configuration>" > nuget.config
-
+        echo ${{ secrets.NUGET_FEED_ACCESS }}
+   
     - name: Restore dependencies
       run: dotnet restore
 
@@ -80,7 +68,7 @@ jobs:
             <packageSourceCredentials>
               <github>
                 <add key=\"Username\" value=\"d1amond09\" />
-                <add key=\"ClearTextPassword\" value=\"${{ secrets.PAT_FOR_NUGET }}\" />
+                <add key=\"ClearTextPassword\" value=\"${{ secrets.NUGET_FEED_ACCESS }}\" />
               </github>
             </packageSourceCredentials>
           </configuration>"
