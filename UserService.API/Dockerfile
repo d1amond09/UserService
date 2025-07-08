@@ -14,7 +14,11 @@ COPY ["UserService.API/UserService.API.csproj", "UserService.API/"]
 COPY ["UserService.Application/UserService.Application.csproj", "UserService.Application/"]
 COPY ["UserService.Domain/UserService.Domain.csproj", "UserService.Domain/"]
 COPY ["UserService.Infrastructure/UserService.Infrastructure.csproj", "UserService.Infrastructure/"]
-RUN dotnet restore "./UserService.API/UserService.API.csproj"
+COPY ["nuget.config", "./"]
+
+RUN --mount=type=secret,id=nugetconfig,target=nuget.config \
+    dotnet restore "UserService.API/UserService.API.csproj"
+
 COPY . .
 WORKDIR "/src/UserService.API"
 RUN dotnet build "./UserService.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
