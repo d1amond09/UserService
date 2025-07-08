@@ -82,7 +82,10 @@ public class TokenService : ITokenService
 		{
 			new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
 			new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), 
-            new(JwtRegisteredClaimNames.Name, user.UserName ?? "")
+            new(JwtRegisteredClaimNames.Name, user.UserName ?? ""),
+			new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+			new(ClaimTypes.Name, user.UserName ?? ""),
+			new(ClaimTypes.Email, user.Email ?? "")
 		};
 
 		var roles = await _userManager.GetRolesAsync(user);

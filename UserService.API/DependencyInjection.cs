@@ -44,9 +44,9 @@ public static class DependencyInjection
 			{
 				var ex = pdContext.Exception;
 
-				pdContext.ProblemDetails.Extensions["traceId"] = configuration.GetConnectionString("Default");//pdContext.HttpContext.TraceIdentifier;
+				pdContext.ProblemDetails.Extensions["traceId"] = pdContext.HttpContext.TraceIdentifier;
 
-				if (environment.IsDevelopment() && ex is not null)
+				if (ex is not null)
 					pdContext.ProblemDetails.Extensions["exception"] = ex.ToString();
 			};
 		});

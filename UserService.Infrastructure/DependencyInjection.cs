@@ -66,7 +66,9 @@ public static class DependencyInjection
 
 	private static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
 	{
-		string connectionString = configuration.GetConnectionString("Default") ?? string.Empty;
+		string connectionString = configuration.GetConnectionString("Default") 
+			?? Environment.GetEnvironmentVariable("DEFAULT_DB_CONNECTION") 
+			?? string.Empty;
 
 		services.AddDbContext<AppDbContext>(opts =>
 			opts.UseNpgsql(connectionString, b =>
