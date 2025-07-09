@@ -22,19 +22,27 @@ jobs:
     - name: Create nuget.config for private packages
       run: |
         echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
-          <configuration>
-            <packageSources>
-              <add key=\"nuget.org\" value=\"https://api.nuget.org/v3/index.json\" protocolVersion=\"3\" />
-              <add key=\"github\" value=\"https://nuget.pkg.github.com/d1amond09/index.json\" />
-            </packageSources>
-            <packageSourceCredentials>
-              <github>
-                <add key=\"Username\" value=\"d1amond09\" />
-                <add key=\"ClearTextPassword\" value=\"${{ secrets.NUGET_FEED_ACCESS }}\" />
-              </github>
-            </packageSourceCredentials>
-          </configuration>"
-   
+        <configuration>
+          <packageSources>
+            <add key=\"nuget.org\" value=\"https://api.nuget.org/v3/index.json\" protocolVersion=\"3\" />
+            <add key=\"github\" value=\"https://nuget.pkg.github.com/d1amond09/index.json\" />
+          </packageSources>
+          <packageSourceCredentials>
+            <github>
+              <add key=\"Username\" value=\"d1amond09\" />
+              <add key=\"ClearTextPassword\" value=\"${{ secrets.PAT_FOR_NUGET }}\" />
+            </github>
+          </packageSourceCredentials>
+        </configuration>" > nuget.config
+    
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Release 
       
   build-and-push-docker:
     needs: build-and-test 
@@ -58,14 +66,26 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
           
     - name: Build and push Docker image
-      uses: docker/build-push-action@v5 
+      uses: docker/build-push-action@v5
       with:
         context: . 
         file: ./UserService.API/Dockerfile 
         push: true 
         tags: d1amond9/user-service-api:latest
         secrets: |
-          "nugetconfig=<?xml version=""1.0"" encoding=""utf-8""?><configuration><packageSources><add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" protocolVersion=""3"" /><add key=""github"" value=""https://nuget.pkg.github.com/YOUR_GITHUB_USERNAME/index.json"" /></packageSources><packageSourceCredentials><github><add key=""Username"" value=""YOUR_GITHUB_USERNAME"" /><add key=""ClearTextPassword"" value=""${{ secrets.PAT_FOR_NUGET }}"" /></github></packageSourceCredentials></configuration>"
-    
+          "nugetconfig=<?xml version=\"1.0\" encoding=\"utf-8\"?>
+          <configuration>
+            <packageSources>
+              <add key=\"nuget.org\" value=\"https://api.nuget.org/v3/index.json\" protocolVersion=\"3\" />
+              <add key=\"github\" value=\"https://nuget.pkg.github.com/d1amond09/index.json\" />
+            </packageSources>
+            <packageSourceCredentials>
+              <github>
+                <add key=\"Username\" value=\"d1amond09\" />
+                <add key=\"ClearTextPassword\" value=\"${{ secrets.PAT_FOR_NUGET }}\" />
+              </github>
+            </packageSourceCredentials>
+          </configuration>"
+          
     - name: Complete workflow
       run: echo "Workflow completed successfully!"
