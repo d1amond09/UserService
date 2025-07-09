@@ -16,7 +16,7 @@ COPY ["UserService.Domain/UserService.Domain.csproj", "UserService.Domain/"]
 COPY ["UserService.Infrastructure/UserService.Infrastructure.csproj", "UserService.Infrastructure/"]
 COPY ["nuget.config", "./"]
 
-RUN --mount=type=secret,id=nuget_config,target=nuget.config \
+RUN --mount=type=secret,id=nugetconfig,target=nuget.config \
     dotnet restore "UserService.API/UserService.API.csproj"
 
 COPY . .
