@@ -34,7 +34,7 @@ public class ResendConfirmationEmailHandler(
 
 		try
 		{
-			await emailService.SendEmailConfirmationAsync(user, token);
+			await emailService.SendEmailConfirmationAsync(user, token, request.ClientUri);
 			logger.LogInformation("Confirmation email resent successfully to {Email}", request.Email);
 		}
 		catch (Exception ex)

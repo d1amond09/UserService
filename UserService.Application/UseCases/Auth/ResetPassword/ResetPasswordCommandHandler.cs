@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 using UserService.Domain.Users;
 
 namespace UserService.Application.UseCases.Auth.ResetPassword;
@@ -16,7 +18,18 @@ public class ResetPasswordCommandHandler(UserManager<User> userManager)
 		var user = await userManager.FindByEmailAsync(request.Email)
 			?? throw new ValidationException("Invalid password reset request.");
 
-		var result = await userManager.ResetPasswordAsync(user, request.Token, request.Password);
+		string decodedToken;
+		try
+		{
+			var decodedBytes = WebEncoders.Base64UrlDecode(request.Token);
+			decodedToken = Encoding.UTF8.GetString(decodedBytes);
+		}
+		catch (FormatException)
+		{
+			throw new ValidationException("Invalid token format.");
+		}
+
+		var result = await userManager.ResetPasswordAsync(user, decodedToken, request.Password);
 
 		if (!result.Succeeded)
 		{

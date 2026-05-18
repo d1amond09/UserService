@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 using UserService.API;
 using UserService.Application;
 using UserService.Infrastructure;
+using UserService.Infrastructure.Middlewares;
 
 
 Log.Logger = new LoggerConfiguration()
@@ -44,12 +44,13 @@ try
 	app.UseCors();
 	app.UseHttpsRedirection();
 	app.UseAuthentication();
+	app.UseMiddleware<UserStatusMiddleware>();
 	app.UseAuthorization();
 	app.MapControllers();
 
 	app.Run();
 }
-catch (Exception ex)
+catch (Exception ex) when (ex is not HostAbortedException)
 {
 	Log.Fatal(ex, "Application terminated unexpectedly");
 }

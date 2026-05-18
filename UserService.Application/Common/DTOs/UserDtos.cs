@@ -17,6 +17,7 @@ public record UserForRegistrationDto
 {
 	public string? FirstName { get; init; }
 	public string? LastName { get; init; }
+
 	[Required(ErrorMessage = "Username is required")]
 	public string? UserName { get; init; }
 
@@ -31,20 +32,27 @@ public record UserForRegistrationDto
 	[Required(ErrorMessage = "Email is required")]
 	[EmailAddress]
 	public string? Email { get; init; }
+
+	[Required(ErrorMessage = "Client URI is required")]
+	public string? ClientUri { get; init; }
 }
 
 public record UserForLoginDto
 {
-	[Required(ErrorMessage = "UserName is required")]
-	public string? UserName { get; init; }
+	[Required(ErrorMessage = "EmailOrUserName is required")]
+	public string? EmailOrUserName { get; init; }
+
 	[Required(ErrorMessage = "Password name is required")]
 	public string? Password { get; init; }
 }
 
 public record UserSummaryDto(Guid Id, string UserName, string Email);
+
 public record UserDetailsDto(Guid Id, string UserName, string Email, string? FirstName, string? LastName)
 {
 	public bool IsBlocked { get; init; }
 	public string? PictureUrl { get; set; }
 	public IList<string> Roles { get; set; } = [];
 }
+
+public record IsUserBlockedDto(bool IsBLocked);

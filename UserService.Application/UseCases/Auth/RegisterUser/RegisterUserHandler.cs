@@ -3,8 +3,6 @@ using UserService.Domain.Users;
 using AutoMapper;
 using MediatR;
 using UserService.Domain.Common.Constants;
-using UserService.Application.Common.Interfaces.Persistence;
-using System.Diagnostics;
 using UserService.Application.Common.Exceptions;
 using UserService.Application.Common.Interfaces;
 
@@ -36,7 +34,7 @@ public class RegisterUserHandler(UserManager<User> userManager, IMapper mapper, 
 
 		var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 		
-		await emailService.SendEmailConfirmationAsync(user, token);
+		await emailService.SendEmailConfirmationAsync(user, token, request.UserForRegistrationDto.ClientUri!);
 
 		return user.Id;
 	}

@@ -11,6 +11,7 @@ public class User : IdentityUser<Guid>
 	public DateTime RefreshTokenExpiryTime { get; set; }
 	public bool IsBlocked { get; private set; }
 	public Guid? PictureId { get; set; }
+	public virtual Picture? Picture { get; set; }
 	public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 
 	public User(string userName, string email) : base(userName)

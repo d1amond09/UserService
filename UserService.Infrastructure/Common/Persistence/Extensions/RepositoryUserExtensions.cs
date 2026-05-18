@@ -14,6 +14,15 @@ public static class RepositoryUserExtensions
 			users = users.Where(u => u.IsBlocked == parameters.IsBlocked.Value);
 		}
 
+		if (!string.IsNullOrEmpty(parameters.Role))
+		{
+			var role = parameters.Role.ToUpper();
+
+			users = users.Where(u =>
+				u.UserRoles.Any(userRole =>
+					userRole.Role.NormalizedName.Contains(role)));
+		}
+
 		return users; 
 	}
 

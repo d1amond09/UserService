@@ -11,8 +11,8 @@ public class LoginUserCommandValidator : AbstractValidator<LoginUserCommand>
 	{
 		RuleFor(x => x.UserToLogin).NotNull();
 
-		RuleFor(x => x.UserToLogin.UserName)
-			.NotEmpty().WithMessage("Username is required.");
+		RuleFor(x => x.UserToLogin.EmailOrUserName)
+			.NotEmpty().WithMessage("Username/email is required.");
 
 		RuleFor(x => x.UserToLogin.Password)
 			.NotEmpty().WithMessage("Password is required.");

@@ -2,8 +2,6 @@
 using MediatR;
 using UserService.Application.Common.DTOs;
 using UserService.Application.Common.Interfaces.Persistence;
-using UserService.Application.Common.Interfaces;
-using UserService.Application.UseCases.Users.GetUserMe;
 using UserService.Application.Common.Exceptions;
 using UserService.Domain.Users;
 using UserService.Domain.Common.Constants;

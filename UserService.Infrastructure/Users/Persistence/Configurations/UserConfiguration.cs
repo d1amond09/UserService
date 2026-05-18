@@ -8,6 +8,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
 	public void Configure(EntityTypeBuilder<User> builder)
 	{
+		builder.HasOne(u => u.Picture)
+			.WithMany()
+			.HasForeignKey(u => u.PictureId)
+			.OnDelete(DeleteBehavior.SetNull);
+
 		builder.HasMany(e => e.UserRoles)
 			 .WithOne(e => e.User)
 			 .HasForeignKey(ur => ur.UserId)

@@ -1,17 +1,22 @@
-﻿using UserService.Application.Common.RequestFeatures.ModelParameters;
-using UserService.Application.UseCases.Users.DeleteUser;
-using UserService.Application.UseCases.Users.GetUserMe;
-using UserService.Application.UseCases.Users.GetUsers;
-using UserService.Application.Common.DTOs;
-using UserService.Domain.Common.Constants;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using MediatR;
+using UserService.Application.Common.DTOs;
+using UserService.Application.Common.RequestFeatures.ModelParameters;
+using UserService.Application.UseCases.Users.DeleteAvatar;
+using UserService.Application.UseCases.Users.DeleteUser;
 using UserService.Application.UseCases.Users.GetUserById;
+using UserService.Application.UseCases.Users.GetUserMe;
+using UserService.Application.UseCases.Users.GetUsers;
+using UserService.Application.UseCases.Users.IsUserBlocked;
 using UserService.Application.UseCases.Users.UpdateUser;
 using UserService.Application.UseCases.Users.UpdateUserByAdmin;
 using UserService.Application.UseCases.Users.UpdateUserStatus;
+using UserService.Application.UseCases.Users.UploadAvatar;
+using UserService.Domain.Common.Constants;
 
 namespace UserService.API.Controllers;
 
@@ -37,7 +42,15 @@ public class UsersController(ISender sender) : ControllerBase
 		return Ok(userDetails);
 	}
 
-	[Authorize]
+	[AllowAnonymous]
+	[HttpGet("{id:guid}/is-blocked")]
+	public async Task<IActionResult> IsUserBlocked(Guid id)
+	{
+		var userIsBlocked = await _sender.Send(new IsUserBlockedQuery(id));
+		return Ok(userIsBlocked);
+	}
+
+	[Authorize(Roles = "Admin")]
 	[HttpGet]
 	public async Task<IActionResult> GetUsers([FromQuery] UserParameters userParameters)
 	{
@@ -68,6 +81,24 @@ public class UsersController(ISender sender) : ControllerBase
 	public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto request)
 	{
 		await _sender.Send(new UpdateUserCommand(request));
+		return NoContent();
+	}
+
+	[Authorize]
+	[HttpPost("avatar")]
+	[Consumes("multipart/form-data")]
+	public async Task<IActionResult> UploadAvatar(IFormFile file)
+	{
+		var imageUrl = await _sender.Send(new UploadAvatarCommand(file));
+
+		return Ok(new { Url = imageUrl });
+	}
+
+	[Authorize]
+	[HttpDelete("avatar")]
+	public async Task<IActionResult> DeleteAvatar()
+	{
+		await _sender.Send(new DeleteAvatarCommand());
 		return NoContent();
 	}
 

@@ -12,8 +12,17 @@ public class LoginUserHandler(UserManager<User> userManager, SignInManager<User>
 {
 	public async Task<TokenDto> Handle(LoginUserCommand request, CancellationToken ct)
 	{
-		User user = await userManager.FindByNameAsync(request.UserToLogin.UserName ?? "")
-			?? throw new NotFoundException($"User with username '{request.UserToLogin.UserName}' was not found.");
+		var login = request.UserToLogin.EmailOrUserName ?? "";
+
+		User? user = (login.Contains('@') 
+			? await userManager.FindByEmailAsync(login) 
+			: await userManager.FindByNameAsync(login))
+				?? throw new NotFoundException("Invalid username/email or password.");
+
+		if (user.IsBlocked)
+		{
+			throw new AuthenticationException("This account has been blocked.");
+		}
 
 		var result = await signInManager.CheckPasswordSignInAsync(user, request.UserToLogin.Password ?? "", lockoutOnFailure: false);
 

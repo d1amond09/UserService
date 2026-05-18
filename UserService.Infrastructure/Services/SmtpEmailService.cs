@@ -10,14 +10,13 @@ using UserService.Domain.Common;
 
 namespace UserService.Infrastructure.Services;
 
-public class SmtpEmailService(IOptions<EmailSettings> emailOptions, IOptions<WebAppSettings> webAppSettings) : IEmailService
+public class SmtpEmailService(IOptions<EmailSettings> emailOptions) : IEmailService
 {
 	private readonly EmailSettings _emailSettings = emailOptions.Value;
-	private readonly WebAppSettings _webAppSettings = webAppSettings.Value;
 
-	public async Task SendEmailConfirmationAsync(User user, string token)
+	public async Task SendEmailConfirmationAsync(User user, string token, string clientUri)
 	{
-		var confirmationLink = $"{_webAppSettings.FrontendBaseUrl}/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+		var confirmationLink = $"{clientUri.TrimEnd('/')}?userId={user.Id}&token={Uri.EscapeDataString(token)}";
 
 		string subject = "Confirm your account";
 		string body = $"<p>Hello {user.UserName},</p>" +
@@ -51,9 +50,9 @@ public class SmtpEmailService(IOptions<EmailSettings> emailOptions, IOptions<Web
 		await smtp.DisconnectAsync(true);
 	}
 
-	public async Task SendPasswordResetAsync(User user, string token)
+	public async Task SendPasswordResetAsync(User user, string token, string clientUri)
 	{
-		var resetLink = $"{_webAppSettings.FrontendBaseUrl}/reset-password?email={Uri.EscapeDataString(user.Email ?? "")}&token={Uri.EscapeDataString(token)}";
+		var resetLink = $"{clientUri.TrimEnd('/')}?email={Uri.EscapeDataString(user.Email ?? "")}&token={Uri.EscapeDataString(token)}";
 
 		string subject = "Reset your password";
 		string body = $"<p>Hello {user.UserName},</p>" +

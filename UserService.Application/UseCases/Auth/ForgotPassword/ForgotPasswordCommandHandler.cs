@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 using UserService.Application.Common.Interfaces;
 using UserService.Domain.Users;
 
@@ -11,13 +13,16 @@ public class ForgotPasswordCommandHandler(
 {
 	public async Task Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
 	{
-		var user = await userManager.FindByEmailAsync(request.Email);
+		var user = await userManager.FindByEmailAsync(request.forgotPassword.Email);
 
 		if (user is null || !await userManager.IsEmailConfirmedAsync(user))
 			return;
 
 		var token = await userManager.GeneratePasswordResetTokenAsync(user);
 
-		await emailService.SendPasswordResetAsync(user, token);
+		var encodedBytes = Encoding.UTF8.GetBytes(token);
+		var validToken = WebEncoders.Base64UrlEncode(encodedBytes);
+
+		await emailService.SendPasswordResetAsync(user, validToken, request.forgotPassword.ClientUri);
 	}
 }

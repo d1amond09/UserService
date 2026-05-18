@@ -61,9 +61,9 @@ public class AuthController(ISender sender)
 
 	[HttpPost("forgot-password")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
-	public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+	public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPassword)
 	{
-		await sender.Send(command);
+		await sender.Send(new ForgotPasswordCommand(forgotPassword));
 
 		return Ok(new { Message = "If an account with this email exists, a password reset link has been sent." });
 	}

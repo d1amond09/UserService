@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Authentication;
 using UserService.Application.Common.DTOs;
 using UserService.Application.Common.Exceptions;
 using UserService.Application.Common.Interfaces;
@@ -20,6 +21,10 @@ public class ExternalLoginCommandHandler(
 		var loginInfo = new UserLoginInfo(externalUser.Provider, externalUser.ProviderKey, externalUser.Provider);
 
 		var user = await FindOrCreateUserAsync(loginInfo, externalUser);
+		if (user.IsBlocked)
+			throw new AuthenticationException("Account is blocked.");
+
+
 
 		return await tokenService.CreateTokensAsync(user);
 	}
@@ -33,7 +38,18 @@ public class ExternalLoginCommandHandler(
 		user = await userManager.FindByEmailAsync(externalUser.Email);
 		if (user != null)
 		{
-			await userManager.AddLoginAsync(user, loginInfo);
+			var logins = await userManager.GetLoginsAsync(user);
+			if (logins.All(l => l.LoginProvider != loginInfo.LoginProvider))
+			{
+				await userManager.AddLoginAsync(user, loginInfo);
+			}
+
+			if (!user.EmailConfirmed)
+			{
+				user.EmailConfirmed = true;
+				await userManager.UpdateAsync(user);
+			}
+
 			return user;
 		}
 

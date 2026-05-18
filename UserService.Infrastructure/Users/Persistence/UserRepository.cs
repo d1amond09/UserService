@@ -13,6 +13,7 @@ public class UserRepository(AppDbContext db) : RepositoryBase<User>(db), IUserRe
 {
 	public async Task<User?> GetByIdAsync(Guid userId, CancellationToken ct) =>
 		await FindAll()
+			.Include(u => u.Picture)
 			.Include(u => u.UserRoles)
 			.ThenInclude(ur => ur.Role)
 			.FirstOrDefaultAsync(u => u.Id == userId, ct);
@@ -20,6 +21,7 @@ public class UserRepository(AppDbContext db) : RepositoryBase<User>(db), IUserRe
 	public async Task<PagedList<User>> GetAllAsync(UserParameters userParams, CancellationToken ct)
 	{
 		IQueryable<User> usersQuery = FindAll()
+			.Include(u => u.Picture)
 			.Include(u => u.UserRoles)
 			.ThenInclude(ur => ur.Role)
 			.FilterUsers(userParams)
@@ -35,6 +37,7 @@ public class UserRepository(AppDbContext db) : RepositoryBase<User>(db), IUserRe
 
 	public async Task<IEnumerable<User>> GetByIdsAsync(IEnumerable<Guid> userIds, CancellationToken ct) =>
 		await FindAll()
+			.Include(u => u.Picture)
 			.Include(u => u.UserRoles)
 			.ThenInclude(ur => ur.Role)
 			.Where(u => userIds.Contains(u.Id))

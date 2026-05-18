@@ -13,10 +13,12 @@ public class MappingProfile : Profile
 		CreateMap<UpdateUserDto, User>()
 			.ForMember(dest => dest.UserName, opt => opt.Ignore());
 
+		CreateMap<User, IsUserBlockedDto>();
 		CreateMap<User, UserSummaryDto>();
 		CreateMap<User, UserDetailsDto>()
 			.ForMember(dest => dest.Roles, opt => opt.Ignore())
-			.ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.Name).ToList()));
+			.ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role!.Name).ToList()))
+			.ForMember(dest => dest.PictureUrl, opt => opt.MapFrom(src => src.Picture != null ? src.Picture.Url : null));
 	}
 }
 

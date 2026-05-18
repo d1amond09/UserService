@@ -1,27 +1,25 @@
-﻿using System.Configuration;
-using System.Diagnostics;
-using System.Text;
-using UserService.Application.Common.DTOs;
-using UserService.Application.Common.Interfaces;
-using UserService.Domain.Users;
-using UserService.Infrastructure.Common.Persistence;
-using UserService.Infrastructure.Users.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using UserService.Infrastructure.Services;
-using UserService.Application.Common.Interfaces.Persistence;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using UserService.Infrastructure.Security;
+using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
+using UserService.Application.Common.Interfaces;
+using UserService.Application.Common.Interfaces.Persistence;
+using UserService.Domain.Users;
 using UserService.Infrastructure.Common.Configuration;
+using UserService.Infrastructure.Common.Persistence;
+using UserService.Infrastructure.Security;
 using UserService.Infrastructure.Security.CustomTokenProviders;
-using Microsoft.AspNetCore.Http;
+using UserService.Infrastructure.Services;
+using UserService.Infrastructure.Users.Persistence;
+using Role = UserService.Domain.Users.Role;
 
 namespace UserService.Infrastructure;
 
@@ -88,11 +86,24 @@ public static class DependencyInjection
 		configuration.Bind(CacheSettings.SectionName, cacheSettings);
 		services.AddSingleton(Options.Create(cacheSettings));
 
+		services.AddSingleton<IConnectionMultiplexer>(sp =>
+		{
+			var options = new ConfigurationOptions
+			{
+				EndPoints = { { cacheSettings.Host, cacheSettings.Port } },
+				User = cacheSettings.User,
+				Password = cacheSettings.Password, 
+				AbortOnConnectFail = false
+			};
+			return ConnectionMultiplexer.Connect(options);
+		});
+
 		services.AddStackExchangeRedisCache(options =>
 		{
-			options.Configuration = cacheSettings.ConnectionString;
+			options.Configuration = $"{cacheSettings.Host}:{cacheSettings.Port},user={cacheSettings.User},password={cacheSettings.Password}";
 			options.InstanceName = cacheSettings.InstanceName;
 		});
+
 		return services;
 	}
 

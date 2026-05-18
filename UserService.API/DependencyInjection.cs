@@ -58,7 +58,7 @@ public static class DependencyInjection
 		{
 			s.SwaggerDoc("v1", new OpenApiInfo
 			{
-				Title = "Custom Forms API",
+				Title = "User Service API",
 				Version = "v1"
 			});
 			s.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());

@@ -9,6 +9,9 @@ namespace UserService.Infrastructure.Common.Configuration;
 public class CacheSettings
 {
 	public const string SectionName = "CacheSettings";
-	public string ConnectionString { get; init; } = string.Empty;
-	public string InstanceName { get; init; } = string.Empty;
+	public string InstanceName { get; set; } = "MyApplication:";
+	public string Host { get; set; } = "localhost";
+	public int Port { get; set; } = 6379;
+	public string User { get; set; } = "default"; 
+	public string Password { get; set; } = "";
 }

@@ -20,7 +20,7 @@ public class PagedList<T>
 	}
 
 	[JsonConstructor]
-	public PagedList(List<T> items, MetaData metaData)
+	public PagedList(List<T> items, MetaData? metaData)
 	{
 		Items = items;
 		MetaData = metaData;
